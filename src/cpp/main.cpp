@@ -3,16 +3,40 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
-#include "imgui.h"
-#include "imgui_impl_sdl.h"
-#include "imgui_impl_opengl3.h"
-#include <stdio.h>
+#include <iostream>
+
 #include <SDL2/SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL2/SDL_opengles2.h>
 #else
 #include <SDL2/SDL_opengl.h>
 #endif
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
+#include <vlc.hpp>
+
+int target_fps = 30;
+std::string videoPath = "test.mp4";
+
+std::mutex vlcMutex;
+bool needUpdate = false;
+unsigned char* pixelBuffer;
+
+void *videoLockCallBack(void *object, void **planes) {
+    
+    vlcMutex.lock();
+    planes[0] = (void *)pixelBuffer;
+    return NULL;
+}
+
+void videoUnlockCallback(void *object, void *picture, void * const *planes) {
+
+    needUpdate= true;
+    vlcMutex.unlock();
+}
+
+static void videoDisplayCallback(void *object, void *picture) {}
 
 // Main code
 int main(int, char**)
@@ -60,6 +84,9 @@ int main(int, char**)
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
+    // Set up fps timer:
+    
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -96,10 +123,33 @@ int main(int, char**)
     // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
+    std::cout << "LibVLC was compiled with: " << libvlc_get_compiler();
+    const char* vlcArgs = "-vv";
+    auto instance = VLC::Instance(1, &vlcArgs);
+
+    std::cout << "videoPath: " << videoPath.c_str();
+    VLC::Media loaded_media = VLC::Media(instance, videoPath.c_str(), VLC::Media::FromType::FromPath);
+    // // free(m);
+
+    auto player = new VLC::MediaPlayer(loaded_media);
+    player->setVideoCallbacks(videoLockCallBack, videoUnlockCallback, videoDisplayCallback);
+
+    // Video Texture:
+    GLuint videoTextureId;
+    glGenTextures(1, &videoTextureId);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+
+
     // Main loop
     bool done = false;
     while (!done)
     {
+
+        int frame_start = SDL_GetTicks();
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -130,18 +180,39 @@ int main(int, char**)
             static int counter = 0;
 
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            if (ImGui::Button("Play")) {
+                player->play();
+            }
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
+            if (player->isPlaying()) {
+                if(vlcMutex.try_lock()) {
+                    if(needUpdate) {
+                        glBindTexture(GL_TEXTURE_2D, videoTextureId);
+                        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixelBuffer);
+                        needUpdate = false;
+                    }
+                    vlcMutex.unlock();
+                }
+            }
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            // ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+            // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+            // ImGui::Checkbox("Another Window", &show_another_window);
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
+            
+            // ImGui::SliderInt("FPS ##fps", &target_fps, 10, 120);
+            // ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+            // if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            //     counter++;
+            // ImGui::SameLine();
+            // ImGui::Text("counter = %d", counter);
+
+            auto video_texture = ImGui::ImTextureID()
+
+            // ImGui::Image()
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
@@ -164,6 +235,11 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
+        int frame_end = SDL_GetTicks();
+        int delay_interval = (1000/target_fps) - (frame_end - frame_start);
+        if (delay_interval > 0) {
+            SDL_Delay(delay_interval);      
+        }
     }
 
     // Cleanup

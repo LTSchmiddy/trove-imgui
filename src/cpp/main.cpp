@@ -210,7 +210,7 @@ int main(int, char**)
             // ImGui::SameLine();
             // ImGui::Text("counter = %d", counter);
 
-            auto video_texture = ImGui::ImTextureID()
+            auto video_texture = ImGui::ImTextureID();
 
             // ImGui::Image()
 

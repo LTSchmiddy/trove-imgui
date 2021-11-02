@@ -1,5 +1,8 @@
 target_sources(${TARGET_NAME} 
     PUBLIC
+    "./main.h"
     "./main.cpp"
-    # "./vlc_test.cpp"
 )
+
+add_subdirectory("./ui")
+add_subdirectory("./playback")

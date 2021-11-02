@@ -4,6 +4,10 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #include <iostream>
+#include <fstream>
+#include <format>
+#include <string>
+#include <string_view>
 
 #include <SDL2/SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -16,12 +20,19 @@
 #include <imgui_impl_opengl3.h>
 #include <vlc.hpp>
 
-int target_fps = 30;
+#include <stb_image.h>
+
+// #include "SDL_syswm.h"
+
+int target_fps = 60;
 std::string videoPath = "test.mp4";
+int vw = 640;
+int vh = 480;
+int pb_size = vw*vh*3;
 
 std::mutex vlcMutex;
 bool needUpdate = false;
-unsigned char* pixelBuffer;
+unsigned char* pixelBuffer = new unsigned char[pb_size];
 
 void *videoLockCallBack(void *object, void **planes) {
     
@@ -30,13 +41,117 @@ void *videoLockCallBack(void *object, void **planes) {
     return NULL;
 }
 
-void videoUnlockCallback(void *object, void *picture, void * const *planes) {
-
-    needUpdate= true;
+void videoUnlockCallback(void* object, void* picture, void* const* planes) {
+    needUpdate = true;
     vlcMutex.unlock();
 }
 
-static void videoDisplayCallback(void *object, void *picture) {}
+static void videoDisplayCallback(void* object, void* picture) {}
+
+// void* videoLockCallBack(void **planes) {
+    
+//     vlcMutex.lock();
+//     // planes[0] = (void *)pixelBuffer;
+//     planes[0] = &pixelBuffer;
+//     return NULL;
+// }
+
+// void videoUnlockCallback(void* picture, void* const* planes) {
+//     needUpdate = true;
+//     vlcMutex.unlock();
+// }
+
+// static void videoDisplayCallback(void* picture) {}
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+// Simple helper function to load an image into a OpenGL texture with common settings
+bool LoadTextureFromFile(const char* filename, GLuint* out_texture, int* out_width, int* out_height)
+{
+    // Load from file
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // Create a OpenGL texture identifier
+    GLuint image_texture;
+    glGenTextures(1, &image_texture);
+    glBindTexture(GL_TEXTURE_2D, image_texture);
+
+    // Setup filtering parameters for display
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+    // Upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+    stbi_image_free(image_data);
+
+    *out_texture = image_texture;
+    *out_width = image_width;
+    *out_height = image_height;
+
+    return true;
+}
+
+bool LoadTextureFromData(const char* image_data, GLuint* out_texture, int* out_width, int* out_height)
+{
+    // Load from file
+    int image_width = vw;
+    int image_height = vh;
+
+    // Create a OpenGL texture identifier
+    // glGenTextures(1, &image_texture);
+    glBindTexture(GL_TEXTURE_2D, *out_texture);
+
+    // Setup filtering parameters for display.
+    // Guess these were more important than I thought.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
+    // Upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
+    // stbi_image_free(image_data);
+
+    // *out_texture = image_texture;
+    *out_width = image_width;
+    *out_height = image_height;
+
+    return true;
+}
+
+void drawTestTexture(ImGuiIO& io) {
+    ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
+    ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
+    ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
+    ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+    ImTextureID imguiTextureId = io.Fonts->TexID;
+    float my_tex_w = (float)io.Fonts->TexWidth;
+    float my_tex_h = (float)io.Fonts->TexHeight;
+
+    ImGui::Image(imguiTextureId, ImVec2(my_tex_w, my_tex_h), uv_min, uv_max, tint_col, border_col);
+}
+
+void dumpBuffer(std::string f_name){
+    std::fstream myfile;
+    myfile.open (f_name, std::ios::out | std::ios::binary);
+
+    myfile.write((const char*)pixelBuffer, pb_size);
+
+    myfile.close();
+}
 
 // Main code
 int main(int, char**)
@@ -85,7 +200,7 @@ int main(int, char**)
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
     // Set up fps timer:
-    
+
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -131,18 +246,22 @@ int main(int, char**)
     VLC::Media loaded_media = VLC::Media(instance, videoPath.c_str(), VLC::Media::FromType::FromPath);
     // // free(m);
 
-    auto player = new VLC::MediaPlayer(loaded_media);
-    player->setVideoCallbacks(videoLockCallBack, videoUnlockCallback, videoDisplayCallback);
+    VLC::MediaPlayer player(loaded_media);
+    // player.setVideoCallbacks(videoLockCallBack, videoUnlockCallback, videoDisplayCallback);
+    libvlc_video_set_callbacks(player.get(), videoLockCallBack, videoUnlockCallback, videoDisplayCallback, NULL);;
+    player.setVideoFormat("RV24", vw, vh, vw*3);
 
-    // Video Texture:
+    int test_image_width = 0;
+    int test_image_height = 0;
+    GLuint test_image_texture = 0;
+    bool ret = LoadTextureFromFile("out.png", &test_image_texture, &test_image_width, &test_image_height);
+
     GLuint videoTextureId;
     glGenTextures(1, &videoTextureId);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    int video_image_width = 0;
+    int video_image_height = 0;
 
+    bool show_out;
 
     // Main loop
     bool done = false;
@@ -176,56 +295,57 @@ int main(int, char**)
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
-
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
             if (ImGui::Button("Play")) {
-                player->play();
+                player.play();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Pause")) {
+                player.pause();
+            }            
+            ImGui::SameLine();
+            if (ImGui::Button("Dump")) {
+                dumpBuffer("dump.bin");
             }
 
-            if (player->isPlaying()) {
+            if (player.isPlaying()) {
                 if(vlcMutex.try_lock()) {
                     if(needUpdate) {
-                        glBindTexture(GL_TEXTURE_2D, videoTextureId);
-                        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixelBuffer);
+                        // Supposed to construct the video output as a openGL texture. Doesn't seem to be working.
+                        // By dumping the pixel buffer to a file, and a python script to re-assemble the bytes 
+                        // into RGB pixels and save the resulting image, I can confirm that pixelBuffer does correctly
+                        // hold the video data, meaning that the problem is entirely in rendering with opengl/imgui.
+                        
+
+                        // glBindTexture(GL_TEXTURE_2D, videoTextureId);
+                        // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE, pixelBuffer);
+                        LoadTextureFromData((const char*)pixelBuffer, &videoTextureId, &video_image_width, &video_image_height);
                         needUpdate = false;
                     }
                     vlcMutex.unlock();
                 }
             }
 
-            // ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            // ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            // ImGui::Checkbox("Another Window", &show_another_window);
-
-            
-            // ImGui::SliderInt("FPS ##fps", &target_fps, 10, 120);
-            // ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            // if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-            //     counter++;
-            // ImGui::SameLine();
-            // ImGui::Text("counter = %d", counter);
-
-            auto video_texture = ImGui::ImTextureID();
-
-            // ImGui::Image()
+            ImGui::SliderInt("Target FPS: ", &target_fps, 10, 120);
+            // ImTextureID imguiTextureId(&videoTextureId);
+            // ImGui::Image((void*)(intptr_t)videoTextureId, ImVec2(vw, vh));
+            // ImGui::Checkbox("Show Video Image", &show_out);
+            if (player.isPlaying()) {
+                ImGui::Image((void*)(intptr_t)videoTextureId, ImVec2(vw, vh));
+            }
+            // // Well, the code copied from the ImGui tutorial works as expected. I guess that tells us... something.
+            // ImGui::Image((void*)(intptr_t)test_image_texture, ImVec2(test_image_width, test_image_height));
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
 
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
+        // Before we render, we want to cap the frame rate, so that our cpu usage doesn't run wild:
+        int frame_end = SDL_GetTicks();
+        int delay_interval = (1000/target_fps) - (frame_end - frame_start);
+        if (delay_interval > 0) {
+            SDL_Delay(delay_interval);      
         }
 
         // Rendering
@@ -235,11 +355,6 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
-        int frame_end = SDL_GetTicks();
-        int delay_interval = (1000/target_fps) - (frame_end - frame_start);
-        if (delay_interval > 0) {
-            SDL_Delay(delay_interval);      
-        }
     }
 
     // Cleanup

@@ -5,8 +5,6 @@
 
 #include <iostream>
 
-
-#include <vlc.hpp>
 #include <stb_image.h>
 
 #include "main.h"
@@ -55,13 +53,13 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-
+    
+    
 
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, gl_context);
+    APP_GLOBAL.gl_context = SDL_GL_CreateContext(window);
+    SDL_GL_MakeCurrent(window, APP_GLOBAL.gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
     APP_GLOBAL.window = window;
@@ -80,7 +78,7 @@ int main(int, char**)
     //ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
+    ImGui_ImplSDL2_InitForOpenGL(window, APP_GLOBAL.gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
@@ -102,6 +100,8 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     std::cout << "LibVLC was compiled with: " << libvlc_get_compiler();
 
+    const char* vlcArgs = "-vv";
+    APP_GLOBAL.vlc = new VLC::Instance(1, &vlcArgs);
     UI::MainWindow main_window = UI::MainWindow();
 
     APP_GLOBAL.fragments.emplace_back(&main_window);
@@ -187,9 +187,11 @@ int main(int, char**)
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
-    SDL_GL_DeleteContext(gl_context);
+    SDL_GL_DeleteContext(APP_GLOBAL.gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
+    delete APP_GLOBAL.vlc;
 
     return 0;
 }

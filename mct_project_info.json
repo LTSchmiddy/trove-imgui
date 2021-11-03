@@ -9,8 +9,7 @@
             "imgui[sdl2-binding,opengl3-binding]",
             "opengl",
             "glew",
-            "python3",
-            "nanogui"
+            "python3"
             
 
         ]
@@ -18,7 +17,10 @@
     "required_user_toolchain_values": [
         "LIBVLC_LIB",
         "LIBVLC_INCLUDE",
-        "VLCPP_INCLUDE"
+        "VLCPP_INCLUDE",
+        "LIBVLC_DEBUG_ASSETS",
+        "LIBVLC_RELEASE_ASSETS"
+        
     ],
     "shared_toolchain_files": []
 }

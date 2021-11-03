@@ -20,6 +20,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 # find_package(Boost 1.45.0 COMPONENTS filesystem) 
 
 
+# add_executable(${TARGET_NAME} "./src/cpp/sdl_opengl_player.cpp")
 add_executable(${TARGET_NAME})
 add_subdirectory("./src/cpp")
 
@@ -43,6 +44,10 @@ target_link_libraries(${TARGET_NAME} PRIVATE SDL2::SDL2_ttf)
 find_package(imgui CONFIG REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE imgui::imgui)
 
+find_package(OpenGL COMPONENTS OpenGL REQUIRED)
+message(STATUS ${OPENGL_FOUND})
+target_link_libraries(${TARGET_NAME} PRIVATE OpenGL::GL)
+
 # Adding GLEW
 find_package(GLEW REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE GLEW::GLEW)
@@ -50,7 +55,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE GLEW::GLEW)
 # Adding Python
 find_package(Python3 COMPONENTS Development REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE Python3::Python)
-
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${LIBVLC_LIB})
 
@@ -61,5 +65,32 @@ set_target_properties(${TARGET_NAME}
     RUNTIME_OUTPUT_DIRECTORY "./bin/"
 )
 
+set(VLC_COPY ${LIBVLC_RELEASE_ASSETS})
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(VLC_COPY ${LIBVLC_DEBUG_ASSETS})
+
+    message(STATUS "Using VLC debug assets...")
+endif()
+
+file(COPY ${VLC_COPY}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+
+
+
+# add_executable(r_test "./src/cpp/sdl_opengl_player.cpp")
+# target_link_libraries(r_test PRIVATE SDL2::SDL2 SDL2::SDL2main)
+# target_link_libraries(r_test PRIVATE SDL2::SDL2_image)
+# target_link_libraries(r_test PRIVATE SDL2::SDL2_net)
+# target_link_libraries(r_test PRIVATE SDL2::SDL2_ttf)
+# target_link_libraries(r_test PRIVATE imgui::imgui)
+# target_link_libraries(r_test PRIVATE GLEW::GLEW)
+# target_link_libraries(r_test PRIVATE Python3::Python)
+# target_link_libraries(r_test PRIVATE ${LIBVLC_LIB})
+# set_target_properties(r_test
+#     PROPERTIES
+#     ARCHIVE_OUTPUT_DIRECTORY "./arc/"
+#     LIBRARY_OUTPUT_DIRECTORY "./lib/"
+#     RUNTIME_OUTPUT_DIRECTORY "./bin/"
+# )

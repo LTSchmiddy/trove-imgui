@@ -46,7 +46,7 @@ void videoUnlockCallback(void* object, void* picture, void* const* planes) {
     vlcMutex.unlock();
 }
 
-static void videoDisplayCallback(void* object, void* picture) {}
+void videoDisplayCallback(void* object, void* picture) {}
 
 // void* videoLockCallBack(void **planes) {
     

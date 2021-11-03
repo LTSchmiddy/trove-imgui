@@ -2,6 +2,7 @@
 /build
 /vcpkg
 /run
+/private_libs
 
 /CMakeUserPresets.json
 /mct_user_settings.json

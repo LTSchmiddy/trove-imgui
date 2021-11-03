@@ -1,4 +1,4 @@
-
+#include <iostream>
 #include <SDL2/SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
     #include <SDL2/SDL_opengles2.h>
@@ -8,11 +8,17 @@
 
 #include <vlc.hpp>
 
+
 class VideoBuffer {
     public:
+        
+        bool needs_update;
         unsigned char* buffer;
         VLC::MediaPlayer* player;
+        std::mutex bufferMutex;
 
-    void allocate();
+        VideoBuffer(VLC::MediaPlayer* p_player);
+        ~VideoBuffer();
+        void allocate();
 
 };

@@ -139,8 +139,13 @@ int main(int, char**)
                 done = true;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
+            
+
         }
 
+        if (done == true) {
+            break;
+        }
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -180,6 +185,11 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
+    }
+
+    for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
+        auto fragment = APP_GLOBAL.fragments.at(i);
+        delete fragment;
     }
 
     // Cleanup

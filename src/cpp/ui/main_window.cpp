@@ -12,6 +12,7 @@ namespace UI {
 
     MainWindow::~MainWindow() {
         delete vb;
+        player.stopAsync();
     }
 
     void MainWindow::onDraw() {
@@ -41,7 +42,7 @@ namespace UI {
             
         // }
         vb->render();
-        ImGui::Image(vb->as_imgui_image(), ImVec2(640, 480));
+        ImGui::Image(vb->as_imgui_image(), ImVec2(320, 240));
 
         ImGui::End();
     }

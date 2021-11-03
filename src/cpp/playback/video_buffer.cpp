@@ -30,6 +30,8 @@ unsigned setup_video(void** object, char* chroma, unsigned* width, unsigned* hei
     int pb_size = (*width) * (*height) * 3;
     vb->buffer = new unsigned char[pb_size];
 
+
+
     return 1;
 }
 void cleanup_video(void* object) {
@@ -46,8 +48,16 @@ VideoBuffer::VideoBuffer(VLC::MediaPlayer* p_player) {
     
     glGenTextures(1, &tex);
 
+    w = 640;
+    h = 480;
+
+    int pb_size = w * h * 3;
+    buffer = new unsigned char[pb_size];
+
     libvlc_video_set_callbacks(player->get(), video_lock_callback, video_unlock_callback, video_display_callback, this);
-    libvlc_video_set_format_callbacks(player->get(), setup_video, cleanup_video);
+    // libvlc_video_set_format_callbacks(player->get(), setup_video, cleanup_video);
+    player->setVideoFormat("RV24", 640, 480, 640*3);
+    
 
 }
 

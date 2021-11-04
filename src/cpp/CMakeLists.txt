@@ -4,5 +4,6 @@ target_sources(${TARGET_NAME}
     "./main.cpp"
 )
 
+add_subdirectory("./python")
 add_subdirectory("./ui")
 add_subdirectory("./playback")

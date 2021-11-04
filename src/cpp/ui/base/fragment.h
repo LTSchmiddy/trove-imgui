@@ -17,7 +17,11 @@ namespace UI {
     class Fragment {
 
         public:
-            bool should_draw = true;
+            // Generally, Fragments shouldn't not be stored on the stack. 
+            // But, if you must, set this flag that the cleanup process knows to ignore them.
+            bool delete_during_cleanup = true;
+
+            bool should_draw = true;     
 
             virtual bool onEvent(SDL_Event* event);
             virtual void onBackground();

@@ -4,6 +4,7 @@
 
 namespace UI {
     // === Fragment Class Defs ===
+
     bool Fragment::onEvent(SDL_Event *event) {
         return false;
     }

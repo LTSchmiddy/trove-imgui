@@ -3,19 +3,24 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
+#include "main.h"
 #include <iostream>
-
 #include <stb_image.h>
 
-#include "main.h"
 #include "ui/main_window.h"
 #include "ui/main_menu_bar.h"
+#include "python/init.h"
+
 
 AppGlobal APP_GLOBAL = {};
 
 // Main code
 int main(int, char**)
 {
+    // Initialize Python Interpreter:
+
+    init_python();
+
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to latest version of SDL is recommended!)
@@ -102,9 +107,8 @@ int main(int, char**)
 
     const char* vlcArgs = "-vv";
     APP_GLOBAL.vlc = new VLC::Instance(1, &vlcArgs);
-    UI::MainWindow main_window = UI::MainWindow();
-
-    APP_GLOBAL.fragments.emplace_back(&main_window);
+    UI::MainWindow* main_window = new UI::MainWindow();
+    APP_GLOBAL.fragments.emplace_back(main_window);
 
     // Main loop
     bool done = false;
@@ -140,7 +144,6 @@ int main(int, char**)
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
             
-
         }
 
         if (done == true) {
@@ -187,21 +190,23 @@ int main(int, char**)
         SDL_GL_SwapWindow(window);
     }
 
-    for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
-        auto fragment = APP_GLOBAL.fragments.at(i);
-        delete fragment;
-    }
-
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
+
+    for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
+        auto fragment = APP_GLOBAL.fragments.at(i);
+        if (fragment->delete_during_cleanup){
+            delete fragment;
+        }
+    }
 
     SDL_GL_DeleteContext(APP_GLOBAL.gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
     delete APP_GLOBAL.vlc;
-
+    Py_Finalize();
     return 0;
 }

@@ -3,6 +3,7 @@
 /vcpkg
 /run
 /private_libs
+**/__pycache__
 
 /CMakeUserPresets.json
 /mct_user_settings.json

@@ -5,14 +5,20 @@
 
 namespace UI {
     MainWindow::MainWindow() {
-        loaded_media = VLC::Media(*APP_GLOBAL.vlc, videoPath.c_str(), VLC::Media::FromType::FromPath);
-        player = VLC::MediaPlayer(loaded_media);
-        vb = new VideoBuffer(&player);
+        movie_pane = new MoviePane();
     }
 
     MainWindow::~MainWindow() {
-        delete vb;
-        player.stopAsync();
+        delete movie_pane;
+    }
+
+    bool MainWindow::onEvent(SDL_Event* event){
+        if (movie_pane->onEvent(event)) { return true; }
+
+        return false;
+    }
+    void MainWindow::onBackground(){
+        movie_pane->onBackground();
     }
 
     void MainWindow::onDraw() {
@@ -24,25 +30,11 @@ namespace UI {
         ImGui::SetNextWindowSize(ImVec2(w, h));
         ImGui::Begin("main_window", &show, BG_WINDOW_FLAGS);
 
-        if (player.isPlaying()){
-            if (ImGui::Button("Pause")){
-                player.pause();
-            }
-        } else {
-            if (ImGui::Button("Play")){
-                player.play();
-            }
+        switch(mode) {
+            case MainWindowMode::Movies:
+                movie_pane->onDraw();
         }
-
-        if (ImGui::Button("Add Intf")){
-            APP_GLOBAL.vlc->addIntf("");
-        }
-
-        // if (render->bufferMutex.try_lock()) {
-            
-        // }
-        vb->render();
-        ImGui::Image(vb->as_imgui_image(), ImVec2(320, 240));
+        
 
         ImGui::End();
     }

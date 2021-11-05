@@ -109,8 +109,11 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     std::cout << "LibVLC was compiled with: " << libvlc_get_compiler();
 
-    const char* vlcArgs = "-vv";
-    APP_GLOBAL.vlc = new VLC::Instance(1, &vlcArgs);
+    const char* vlcArgs[] = {
+        "-vv",
+        "--config=./vlc-config.cfg"
+    };
+    APP_GLOBAL.vlc = new VLC::Instance(2, vlcArgs);
     UI::MainWindow* main_window = new UI::MainWindow();
     APP_GLOBAL.fragments.emplace_back(main_window);
 

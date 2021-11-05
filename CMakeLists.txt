@@ -23,21 +23,21 @@ set(PYTHON_DEPS
     sqlalchemy 
     cython
     pywin32
+    debugpy
 )
 
-set(PYTHON_DEBUG_DEPS 
-    ptvsd
-)
+set(PYTHON_DEBUG_DEPS)
 
 # If you're using Boost:
 add_executable(${TARGET_NAME})
 add_subdirectory("./src/cpp")
+include_directories("./src/cpp")
 
 # Adding Python
 find_package(Python 3.10 COMPONENTS Development Interpreter REQUIRED)
-target_link_libraries(${TARGET_NAME} PRIVATE Python::Python Python::Module)
+target_link_libraries(${TARGET_NAME} PRIVATE Python::Python)
 
-message(STATUS ${Python_LIBRARIES})
+message(STATUS PY-SOABI: ${Python_SOABI})
 
 # Adding Boost
 find_package(Boost 1.70.0 COMPONENTS filesystem REQUIRED)
@@ -94,10 +94,23 @@ else()
 endif()
 file(COPY ${VLC_COPY}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-# Copying Python Data
-message(STATUS "Copying Python assets...")
-file(COPY ${Python_EXECUTABLE}/../ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
+
+# Copying Python Data
+if(NOT DEFINED PYTHON_LIB_LOCATION)
+    set (PYTHON_LIB_LOCATION ${Python_EXECUTABLE}/../Lib)
+endif()
+
+if(NOT DEFINED PYTHON_DLLS_LOCATION)
+    set (PYTHON_DLLS_LOCATION ${Python_EXECUTABLE}/../DLLs)
+endif()
+
+message(STATUS "Copying Python assets...")
+file(COPY ${Python_EXECUTABLE} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
+file(COPY ${PYTHON_LIB_LOCATION} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
+
+message(STATUS " -> Using native modules from ${PYTHON_DLLS_LOCATION}")
+file(COPY ${PYTHON_DLLS_LOCATION} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 set(PYTHON_INSTALL_ARGS ${PYTHON_DEPS})
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -109,6 +122,14 @@ message(STATUS "Installing Python/Pip dependencies...")
 exec_program(
     ${CMAKE_CURRENT_BINARY_DIR}/bin/python
     ARGS -m pip install --no-warn-script-location ${PYTHON_INSTALL_ARGS}
+)
+
+# Copying Python source code. To avoid needing different commands depending 
+# on the platform, we'll have the python interpreter that we loaded to copy the files.
+add_custom_command(
+    TARGET ${TARGET_NAME}
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/bin/python
+    ARGS ${CMAKE_SOURCE_DIR}/py_build.py ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

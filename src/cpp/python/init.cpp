@@ -40,5 +40,5 @@ void init_python() {
         debug_module = PyImport_ImportModule("debug");
     }
 
-    main_module = PyImport_ImportModule("hello");
+    main_module = PyImport_ImportModule("main");
 }

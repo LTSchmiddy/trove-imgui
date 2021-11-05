@@ -2,7 +2,7 @@
 /build
 /vcpkg
 /run
-/private_libs
+/_user_private
 **/__pycache__
 
 /CMakeUserPresets.json

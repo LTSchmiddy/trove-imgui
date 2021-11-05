@@ -1,7 +1,6 @@
 #include "movie_pane.h"
 
 
-
 namespace UI {
     MoviePane::MoviePane(){}
     MoviePane::~MoviePane(){}

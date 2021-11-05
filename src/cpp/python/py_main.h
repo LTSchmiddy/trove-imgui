@@ -1,4 +1,5 @@
 #include <Python.h>
+#include <string>
 // #include <boost/python.hpp>
 
 // namespace bpy=boost::python;
@@ -11,5 +12,6 @@
     #define PY_PATH_DELIMITER L":"
 #endif
 
+bool py_simple_error_check(std::string error_message = "");
 bool init_python();
 void shutdown_python();

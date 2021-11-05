@@ -26,6 +26,7 @@ set(PYTHON_DEPS
     python-vlc
     python-telnet-vlc
     debugpy
+    ansicolors
 )
 
 set(PYTHON_DEBUG_DEPS)

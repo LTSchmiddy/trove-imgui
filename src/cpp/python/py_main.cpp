@@ -11,6 +11,22 @@ namespace fs = boost::filesystem;
 PyObject* debug_module;
 PyObject* main_module;
 
+PyObject* init_function;
+PyObject* shutdown_function;
+
+bool py_simple_error_check(std::string error_message) {
+    if (PyErr_Occurred() != NULL) {
+        // This implies that an error has occured.
+
+        PyErr_Print();
+        std::cerr << error_message << "\n";
+
+        return true;
+    }
+
+    return false;
+}
+
 bool init_python() {
 
     // Getting Paths for various python components:
@@ -45,24 +61,26 @@ bool init_python() {
         std::cout << "Debug Port: " << env_port << std::endl;
 
         
-        debug_module = PyImport_ImportModule("debug");
-
-        if (PyErr_Occurred() != NULL) {
-            // This implies that an error has occured.
-
-            PyErr_Print();
-            std::cerr << "Python debug module has failed to load. Skipping...\n";
-        }
+        debug_module = PyImport_ImportModule("debug"); // New Reference
+        
+        py_simple_error_check("Python debug module has failed to load. Skipping...");
+        
     }
 
-    main_module = PyImport_ImportModule("main");
+    main_module = PyImport_ImportModule("main"); // New Reference
 
-    if (PyErr_Occurred() != NULL) {
-        // This implies that an error has occured.
 
-        PyErr_Print();
-        std::cerr << "FATAL ERROR: Python 'main' module has failed to load.\n";
+    if(py_simple_error_check("FATAL ERROR: Python 'main' module has failed to load.")) {
+        return false;
+    }
 
+    // Getting important functions:
+    init_function = PyObject_GetAttrString(main_module, "init"); // New Reference
+    shutdown_function = PyObject_GetAttrString(main_module, "shutdown"); // New Reference
+
+    PyObject_CallNoArgs(init_function);
+
+    if(py_simple_error_check("FATAL ERROR: Python initialization code has failed.")) {
         return false;
     }
 
@@ -76,6 +94,11 @@ void shutdown_python() {
         Py_DECREF(debug_module);
     }
 
+    PyObject_CallNoArgs(shutdown_function);
+
+    Py_DECREF(init_function);
+    Py_DECREF(shutdown_function);
+    
     Py_DECREF(main_module);
 
     Py_Finalize();

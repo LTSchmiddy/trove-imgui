@@ -23,6 +23,8 @@ set(PYTHON_DEPS
     sqlalchemy 
     cython
     pywin32
+    python-vlc
+    python-telnet-vlc
     debugpy
 )
 

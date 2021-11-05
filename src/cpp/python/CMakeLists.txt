@@ -1,5 +1,5 @@
 target_sources(${TARGET_NAME} 
     PUBLIC
-    "./init.h"
-    "./init.cpp"
+    "./py_main.h"
+    "./py_main.cpp"
 )

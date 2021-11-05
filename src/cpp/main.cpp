@@ -9,7 +9,7 @@
 
 #include "ui/main_window.h"
 #include "ui/main_menu_bar.h"
-#include "python/init.h"
+#include "python/py_main.h"
 
 
 AppGlobal APP_GLOBAL = {};
@@ -19,14 +19,18 @@ int main(int, char**)
 {
     // Initialize Python Interpreter:
 
-    init_python();
+    if (!init_python()) {
+        std::cerr << "FATAL ERROR: Python interpreter failed to load. Trove is exiting...";
+        return -1;
+    }
+
 
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to latest version of SDL is recommended!)
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
-        printf("Error: %s\n", SDL_GetError());
+        fprintf(stderr, "Error: %s\n", SDL_GetError());
         return -1;
     }
 
@@ -207,6 +211,7 @@ int main(int, char**)
     SDL_Quit();
 
     delete APP_GLOBAL.vlc;
-    Py_Finalize();
+    
+    shutdown_python();
     return 0;
 }

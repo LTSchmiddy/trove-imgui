@@ -1,3 +1,2 @@
-print("hello alex from PYTHON")
-print(f"{__file__=}")
-
+import os
+import python_telnet_vlc

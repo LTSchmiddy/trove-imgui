@@ -11,4 +11,5 @@
     #define PY_PATH_DELIMITER L":"
 #endif
 
-void init_python();
+bool init_python();
+void shutdown_python();

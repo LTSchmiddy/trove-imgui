@@ -1,0 +1,9 @@
+ansicolors==1.1.8
+Cython==0.29.24
+debugpy==1.5.1
+greenlet==1.1.2
+ptvsd==4.3.2
+python-telnet-vlc==2.0.1
+python-vlc==3.0.12118
+pywin32==302
+SQLAlchemy==1.4.26

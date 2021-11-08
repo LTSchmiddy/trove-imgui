@@ -19,17 +19,17 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 # Disables linking against the Debug version of Python
 # set (Python_FIND_ABI "OFF" "ANY" "ANY")
 
-set(PYTHON_DEPS 
-    sqlalchemy 
-    cython
-    pywin32
-    python-vlc
-    python-telnet-vlc
-    debugpy
-    ansicolors
-)
+# set(PYTHON_DEPS 
+#     sqlalchemy 
+#     cython
+#     pywin32
+#     python-vlc
+#     python-telnet-vlc
+#     debugpy
+#     ansicolors
+# )
 
-set(PYTHON_DEBUG_DEPS)
+# set(PYTHON_DEBUG_DEPS)
 
 # If you're using Boost:
 add_executable(${TARGET_NAME})
@@ -70,7 +70,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE imgui::imgui)
 
 # Adding OpenGL
 find_package(OpenGL COMPONENTS OpenGL REQUIRED)
-message(STATUS ${OPENGL_FOUND})
 target_link_libraries(${TARGET_NAME} PRIVATE OpenGL::GL)
 
 # Adding GLEW
@@ -115,16 +114,11 @@ file(COPY ${PYTHON_LIB_LOCATION} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
 message(STATUS " -> Using native modules from ${PYTHON_DLLS_LOCATION}")
 file(COPY ${PYTHON_DLLS_LOCATION} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-set(PYTHON_INSTALL_ARGS ${PYTHON_DEPS})
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(PYTHON_INSTALL_ARGS ${PYTHON_DEPS} ${PYTHON_DEBUG_DEPS})
-endif()
-
 message(STATUS "Installing Python/Pip dependencies...")
 # Collecting Python dependencies
 exec_program(
-    ${CMAKE_CURRENT_BINARY_DIR}/bin/python
-    ARGS -m pip install --no-warn-script-location ${PYTHON_INSTALL_ARGS}
+    ${Python_EXECUTABLE}
+    ARGS -m pip install --no-warn-script-location --target=\"${CMAKE_CURRENT_BINARY_DIR}/bin/Lib/site-packages\" -r ${CMAKE_SOURCE_DIR}/requirements.txt 
 )
 
 # Copying Python source code. To avoid needing different commands depending 

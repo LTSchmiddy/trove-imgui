@@ -1,8 +1,8 @@
 import os
 
-import settings
-import db
-import scanning
+from lib_trove import settings
+from lib_trove import db
+from lib_trove import scanning
 
 def init():
     settings.load_settings()

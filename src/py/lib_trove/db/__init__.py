@@ -5,7 +5,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-import settings
+from .. import settings
 
 # Base: sqlalchemy.ext.declarative.api.DeclarativeMeta = declarative_base()
 Base = declarative_base()

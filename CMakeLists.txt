@@ -76,6 +76,10 @@ target_link_libraries(${TARGET_NAME} PRIVATE OpenGL::GL)
 find_package(GLEW REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE GLEW::GLEW)
 
+find_package(pybind11 CONFIG REQUIRED)
+# Note: 9 target(s) were omitted.
+target_link_libraries(${TARGET_NAME} PRIVATE pybind11::lto pybind11::embed pybind11::module)
+
 # Linking LibVLC
 target_link_libraries(${TARGET_NAME} PRIVATE ${LIBVLC_LIB})
 

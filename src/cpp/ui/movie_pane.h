@@ -17,5 +17,7 @@ namespace UI {
             bool onEvent(SDL_Event* event) override;
             void onBackground() override;
             void onDraw() override;
+
+            PyObject* test_function_2 (PyObject *self, PyObject *args);
     };
 }

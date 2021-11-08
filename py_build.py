@@ -8,7 +8,7 @@ bin_directory = Path(sys.argv[1])
 print("Running Py Builder...")
 shutil.copytree(
     f"{Path(__file__).parent}/src/py",
-    f"{bin_directory}/bin/py_core",
+    f"{bin_directory}/bin/py",
     ignore=shutil.ignore_patterns("**.pyc"),
     dirs_exist_ok=True,
 )

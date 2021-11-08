@@ -1,5 +1,7 @@
 #include "movie_pane.h"
 
+#include <functional>
+
 
 namespace UI {
     static PyObject* test_function (PyObject *self, PyObject *args) {
@@ -8,6 +10,7 @@ namespace UI {
     }
 
     MoviePane::MoviePane() {
+
         main_window_methods_def = new PyMethodDef[2]{
             {"test_function",  test_function, METH_VARARGS, "Testing 1 2 3..."},
             // {"test_function",  [this](PyObject *self, PyObject *args)-> PyObject* {}, METH_VARARGS, "Testing 1 2 3..."},
@@ -49,6 +52,10 @@ namespace UI {
                 py_simple_error_check("Test scan failed!");
             PY_END_GIL_BLOCK;
         }
+
+    }
+
+    PyObject* MoviePane::test_function_2 (PyObject *self, PyObject *args) {
 
     }
 }

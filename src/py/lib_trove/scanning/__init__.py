@@ -5,9 +5,9 @@ from re import I
 from typing import Any
 from pathlib import Path
 
-import settings
-import db
-from db.tables import Video
+from .. import settings
+from .. import db
+from ..db.tables import Video
 
 recognized_extensions = json.loads(Path(__file__).parent.joinpath("vlc_known_extensions.json").read_text())
 # print(f"{recognized_extensions=}")

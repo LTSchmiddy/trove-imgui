@@ -1,16 +1,8 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship
 
-import db
+from ... import db
 
-# class VideoSource(db.Base):
-#     __tablename__ = 'video_source'
-
-#     # Item Common
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     name = Column(String)
-    
-#     videos = relationship("Video")
 
 class Video(db.Base):
     __tablename__ = 'video'

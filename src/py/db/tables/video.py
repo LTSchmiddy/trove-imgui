@@ -3,17 +3,13 @@ from sqlalchemy.orm import relationship
 
 import db
 
-class JobSite(db.Base):
+class Video(db.Base):
     __tablename__ = 'job_site'
 
     # Item Common
     id = Column(Integer, primary_key=True, autoincrement=True)
     description = Column(String)
-    project = Column(String)
-    street_address = Column(String)
-    city = Column(String)
-    state = Column(String(2))
-    zip_code = Column(Integer)
+    
     
     # Internal info
     # current_equipment = relationship("Equipment", back_populates="current_location_ref")

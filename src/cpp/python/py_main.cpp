@@ -34,7 +34,7 @@ bool init_python() {
     fs::path site_dir = boost::dll::program_location().parent_path().append("Lib/site-packages");
     fs::path dll_dir = boost::dll::program_location().parent_path().append("DLLs");
 
-    fs::path py_dir = boost::dll::program_location().parent_path().append("py");
+    fs::path py_dir = boost::dll::program_location().parent_path().append("py_core");
 
     // Assembling the Python Path string:
     std::wstring delim = PY_PATH_DELIMITER;

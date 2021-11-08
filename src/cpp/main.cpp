@@ -14,6 +14,15 @@
 
 AppGlobal APP_GLOBAL = {};
 
+void init_vlc() {
+    std::cout << "LibVLC was compiled with: " << libvlc_get_compiler();
+    const char* vlcArgs[] = {
+        "-vv",
+        "--config=./vlc-config.cfg"
+    };
+    APP_GLOBAL.vlc = new VLC::Instance(2, vlcArgs);
+}
+
 // Main code
 int main(int, char**)
 {
@@ -24,6 +33,7 @@ int main(int, char**)
         return -1;
     }
 
+    // init_vlc();
 
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
@@ -107,13 +117,6 @@ int main(int, char**)
    
     // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
-    std::cout << "LibVLC was compiled with: " << libvlc_get_compiler();
-
-    const char* vlcArgs[] = {
-        "-vv",
-        "--config=./vlc-config.cfg"
-    };
-    APP_GLOBAL.vlc = new VLC::Instance(2, vlcArgs);
     UI::MainWindow* main_window = new UI::MainWindow();
     APP_GLOBAL.fragments.emplace_back(main_window);
 

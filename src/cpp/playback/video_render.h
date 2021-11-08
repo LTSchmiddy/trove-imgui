@@ -1,32 +1,28 @@
+#pragma once
 
+#include <iostream>
+#include "../ui/core.h"
 
-#ifndef VIDEO_RENDER
-    #define VIDEO_RENDER
+#include <vlc.hpp>
+#include <vlc/vlc.h>
 
-    #include <iostream>
-    #include "../ui/core.h"
+class VideoRender {
+    public:
+        int width, height;
 
-    #include <vlc.hpp>
-    #include <vlc/vlc.h>
+        bool needs_update;
+        unsigned char* buffer;
+        VLC::MediaPlayer* player;
+        std::mutex bufferMutex = std::mutex();
 
-    class VideoRender {
-        public:
-            int width, height;
+        SDL_GLContext ctx;
+        GLuint texture;
 
-            bool needs_update;
-            unsigned char* buffer;
-            VLC::MediaPlayer* player;
-            std::mutex bufferMutex = std::mutex();
+        void(*report_resize)(void *report_opaque, unsigned width, unsigned height);
 
-            SDL_GLContext ctx;
-            GLuint texture;
+        VideoRender(VLC::MediaPlayer* p_player);
+        ~VideoRender();
 
-            void(*report_resize)(void *report_opaque, unsigned width, unsigned height);
+        ImTextureID as_imgui_image();
 
-            VideoRender(VLC::MediaPlayer* p_player);
-            ~VideoRender();
-
-            ImTextureID as_imgui_image();
-
-    };
-#endif
+};

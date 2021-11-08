@@ -1,9 +1,11 @@
+#pragma once
+
 #include <vector>
 
 #include <vlc.hpp>
+
 #include "ui/core.h"
 #include "ui/base/fragment.h"
-
 
 struct AppGlobal {
     int target_fps = 60;
@@ -16,3 +18,5 @@ struct AppGlobal {
 };
 
 extern AppGlobal APP_GLOBAL;
+
+void init_vlc();

@@ -1,7 +1,10 @@
+
+#pragma once
+
 #include <iostream>
-#include "../ui/core.h"
 #include <vlc.hpp>
 
+#include "../ui/core.h"
 
 class VideoBuffer {
     public:

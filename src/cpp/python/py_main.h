@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Python.h>
 #include <string>
 // #include <boost/python.hpp>

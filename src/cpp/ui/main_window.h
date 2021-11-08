@@ -1,3 +1,5 @@
+#pragma once
+
 #include "core.h"
 #include "base/fragment.h"
 #include "../playback/video_buffer.h"

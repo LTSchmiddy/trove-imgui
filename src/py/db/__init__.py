@@ -21,6 +21,6 @@ def init(reset=False):
         metadata.drop_all(db_engine)
     metadata.create_all(db_engine)
 
-def getSession():
+def get_session():
     return scoped_session(sessionmaker(bind=db_engine))
 

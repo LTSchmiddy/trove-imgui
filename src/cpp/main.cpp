@@ -76,7 +76,7 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     
     
-    std::cout << "Starting UI...";
+    std::cout << "Starting UI..." << std::endl;
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Window* window = SDL_CreateWindow("Trove", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     APP_GLOBAL.gl_context = SDL_GL_CreateContext(window);
@@ -122,10 +122,17 @@ int main(int, char**)
     UI::MainWindow* main_window = new UI::MainWindow();
     APP_GLOBAL.fragments.emplace_back(main_window);
 
+    // Releasing the GIL from this thread. We need this if we're gonna use threads on the Python side.
+    // This also means that whenever we want to access the Python interpreter during the main loop,
+    // we'll need to re-aquire the GIL manually, using PyGILState_Ensure() and PyGILState_Release().
+    Py_BEGIN_ALLOW_THREADS;
+
     // Main loop
     bool done = false;
     while (!done)
-    {
+    {   
+        
+        // Starts the frame timer:
         int frame_start = SDL_GetTicks();
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -199,9 +206,12 @@ int main(int, char**)
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        SDL_GL_SwapWindow(window);
+        SDL_GL_SwapWindow(window);  
     }
 
+    // Resuming control of the GIL for finalization:
+    Py_END_ALLOW_THREADS;   
+    
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -219,7 +229,6 @@ int main(int, char**)
     SDL_Quit();
 
     delete APP_GLOBAL.vlc;
-    
     shutdown_python();
     return 0;
 }

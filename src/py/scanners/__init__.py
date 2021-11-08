@@ -1,1 +1,0 @@
-# Scanners locate media files for storage in the library. They don't 

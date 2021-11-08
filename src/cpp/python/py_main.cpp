@@ -7,12 +7,18 @@
 
 namespace fs = boost::filesystem;
 
-// We own these module references:
-PyObject* debug_module;
+// Public values:
 PyObject* main_module;
+PyObject* test_scan_function;
+PyObject* test_module_function;
+
+// Private values:
+PyObject* debug_module;
 
 PyObject* init_function;
 PyObject* shutdown_function;
+
+// We own these all of these references.
 
 bool py_simple_error_check(std::string error_message) {
     if (PyErr_Occurred() != NULL) {
@@ -59,7 +65,6 @@ bool init_python() {
     // If we were told to use the python debugger, start that now:
     if(const char* env_port = std::getenv("TROVE_PY_DEBUG_PORT")) {
         std::cout << "Debug Port: " << env_port << std::endl;
-
         
         debug_module = PyImport_ImportModule("debug"); // New Reference
         
@@ -77,6 +82,8 @@ bool init_python() {
     // Getting important functions:
     init_function = PyObject_GetAttrString(main_module, "init"); // New Reference
     shutdown_function = PyObject_GetAttrString(main_module, "shutdown"); // New Reference
+    test_scan_function = PyObject_GetAttrString(main_module, "test_scan"); // New Reference
+    test_module_function = PyObject_GetAttrString(main_module, "test_module"); // New Reference
 
     PyObject_CallNoArgs(init_function);
 

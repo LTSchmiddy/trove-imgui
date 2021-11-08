@@ -45,6 +45,14 @@ def default_settings():
     return {
         "db": {
             "connection-string": "sqlite:///library.db"
+        },
+        "sources": {
+            "local": {
+                "scanner": "FileScanner",
+                "scan_config": {
+                    "root_path": "F:/Videos"
+                }
+            }
         }
     }
 
@@ -102,9 +110,9 @@ def load_settings(path: str = global_settings_path, settings_dict: dict = curren
     else:
         save_settings(path, settings_dict)
 
-
 def save_settings(path: str = global_settings_path, settings_dict: dict = current):
     outfile = open(path, "w")
     json.dump(settings_dict, outfile, indent=4)
     outfile.close()
+
 

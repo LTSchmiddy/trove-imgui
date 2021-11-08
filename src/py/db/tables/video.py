@@ -3,16 +3,27 @@ from sqlalchemy.orm import relationship
 
 import db
 
+# class VideoSource(db.Base):
+#     __tablename__ = 'video_source'
+
+#     # Item Common
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     name = Column(String)
+    
+#     videos = relationship("Video")
+
 class Video(db.Base):
-    __tablename__ = 'videos'
+    __tablename__ = 'video'
 
     # Item Common
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    mrl = Column(String, primary_key=True)
     fname = Column(String)
     description = Column(String)
-    mrl = Column(String, unique=True)
     
+    source = Column(String)
     
     # Internal info
-    # current_equipment = relationship("Equipment", back_populates="current_location_ref")
-    # assigned_equipment = relationship("Equipment", back_populates="assigned_location_ref")
+    # source_id = Column(Integer, ForeignKey('video_source.id'))
+    # source = relationship("VideoSource", back_populates="videos")
+    
+    

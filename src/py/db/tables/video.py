@@ -4,11 +4,13 @@ from sqlalchemy.orm import relationship
 import db
 
 class Video(db.Base):
-    __tablename__ = 'job_site'
+    __tablename__ = 'videos'
 
     # Item Common
     id = Column(Integer, primary_key=True, autoincrement=True)
+    fname = Column(String)
     description = Column(String)
+    mrl = Column(String, unique=True)
     
     
     # Internal info

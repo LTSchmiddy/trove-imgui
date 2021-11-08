@@ -1,5 +1,6 @@
 /.vscode
 /build
+/node_modules
 /vcpkg
 /run
 /_user_private

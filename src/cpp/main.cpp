@@ -15,7 +15,8 @@
 AppGlobal APP_GLOBAL = {};
 
 void init_vlc() {
-    std::cout << "LibVLC was compiled with: " << libvlc_get_compiler();
+    std::cout << "Loading VLC..." << std::endl;
+    std::cout << "LibVLC was compiled with: " << libvlc_get_compiler() << std::endl;
     const char* vlcArgs[] = {
         "-vv",
         "--config=./vlc-config.cfg"
@@ -27,13 +28,14 @@ void init_vlc() {
 int main(int, char**)
 {
     // Initialize Python Interpreter:
-
+    std::cout << "\n\n\n ===== Trove - Begin Log: ===== "  << std::endl;
     if (!init_python()) {
-        std::cerr << "FATAL ERROR: Python interpreter failed to load. Trove is exiting...";
+        std::cerr << "FATAL ERROR: Python interpreter failed to load. Trove is exiting..." << std::endl;
         return -1;
     }
 
-    // init_vlc();
+    // Load VLC
+    init_vlc();
 
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
@@ -74,9 +76,9 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     
     
-
+    std::cout << "Starting UI...";
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Trove", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     APP_GLOBAL.gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, APP_GLOBAL.gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync

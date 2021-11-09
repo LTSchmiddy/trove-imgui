@@ -26,8 +26,11 @@ class TroveInstance:
 
         print("Instance loaded...")
 
-    def test_method(self):
-        print("HELLO")
+    def scan_all(self, callback):
+        for name, scanner in self.scanners.items():
+            scanner.run()
+            
+        callback(f"ok then... {name}")
 
     def shutdown(self):
         config.save(self.config)

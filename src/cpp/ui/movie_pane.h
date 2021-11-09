@@ -7,10 +7,7 @@
 namespace UI {
 class MoviePane : public Fragment {
 public:
-    PyMethodDef* main_window_methods_def;
-    PyModuleDef main_window_module_def;
-
-    PyObject* main_window_module;
+    py::module_ mod;
 
     MoviePane();
     ~MoviePane();

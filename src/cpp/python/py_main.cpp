@@ -11,13 +11,15 @@ namespace fs = boost::filesystem;
 
 // Private values:
 // PyObject* debug_module;
-pyow* debug_module;
+pymw* debug_module;
 
 // Public values:
 // PyObject* main_module;
 // PyObject* lib_trove_instance;
-pyow* main_module;
+pymw* main_module;
 pyow* lib_trove_instance;
+
+pyow* mod_type;
 
 // We own these all of these references.
 
@@ -37,7 +39,6 @@ bool py_simple_error_check(std::string error_message)
 
 bool init_python(int argc, char** argv)
 {
-
     // Getting Paths for various python components:
     fs::path lib_dir = boost::dll::program_location().parent_path().append("Lib");
     fs::path site_dir = boost::dll::program_location().parent_path().append("Lib/site-packages");
@@ -70,15 +71,21 @@ bool init_python(int argc, char** argv)
     if (const char* env_port = std::getenv("TROVE_PY_DEBUG_PORT")) {
         std::cout << "Debug Port: " << env_port << std::endl;
 
-        // debug_module = PyImport_ImportModule("debug"); // New Reference
-        debug_module = new pyow { py::module_::import("debug") }; // New Reference
-        // debug_module.inc_ref();
+        debug_module = new pymw { py::module_::import("debug") };
+
         py_simple_error_check("Python debug module has failed to load. Skipping...");
     }
 
-    // main_module = PyImport_ImportModule("main"); // New Reference
-    main_module = new pyow { py::module_::import("main") }; // New Reference
-    // main_module.inc_ref();
+    // Using this later to create modules:
+    mod_type = new pyow { py::module_::import("types").attr("ModuleType") };
+
+    // We'll handle the initial attempt to import via the Python C API directly.
+    // Once we're certain we're error free, we'll import it in Pybind11.
+    PyObject* main_mod_ptr = PyImport_ImportModule("main");
+    py_simple_error_check("Python debug module has failed to load. Skipping...");
+    Py_DECREF(main_mod_ptr);
+
+    main_module = new pymw { py::module_::import("main") }; // New Reference
 
     if (py_simple_error_check("FATAL ERROR: Python 'main' module has failed to load.")) {
         return false;
@@ -86,8 +93,6 @@ bool init_python(int argc, char** argv)
 
     // Getting important functions:
     lib_trove_instance = new pyow { main_module->m.attr("init")() };
-    lib_trove_instance->m.attr("test_method")();
-    // lib_trove_instance.inc_ref();
 
     if (py_simple_error_check("FATAL ERROR: Python initialization code has failed.")) {
         return false;
@@ -109,4 +114,8 @@ void shutdown_python()
     delete main_module;
 
     py::finalize_interpreter();
+}
+
+py::module_ create_py_module(const char* mod_name) {
+    return (py::module_) mod_type->o("mod_name");
 }

@@ -16,23 +16,16 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
-# Disables linking against the Debug version of Python
-# set (Python_FIND_ABI "OFF" "ANY" "ANY")
+if (WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    # set stuff for windows
+    add_executable(${TARGET_NAME} WIN32)
+  
+else()
+    # set stuff for other systems
+    add_executable(${TARGET_NAME})
 
-# set(PYTHON_DEPS 
-#     sqlalchemy 
-#     cython
-#     pywin32
-#     python-vlc
-#     python-telnet-vlc
-#     debugpy
-#     ansicolors
-# )
+endif()
 
-# set(PYTHON_DEBUG_DEPS)
-
-# If you're using Boost:
-add_executable(${TARGET_NAME})
 add_subdirectory("./src/cpp")
 include_directories("./src/cpp")
 

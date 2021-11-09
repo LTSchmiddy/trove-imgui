@@ -1,6 +1,5 @@
 
 #include "fragment.h"
-#include "../core.h"
 
 namespace UI {
 // === Fragment Class Defs ===

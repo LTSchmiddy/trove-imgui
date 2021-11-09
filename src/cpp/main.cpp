@@ -140,12 +140,12 @@ int main(int argc, char** argv)
     // on the Python side. This also means that whenever we want to access the
     // Python interpreter during the main loop, we'll need to re-aquire the GIL
     // manually, using PyGILState_Ensure() and PyGILState_Release().
-    Py_BEGIN_ALLOW_THREADS;
+    // Py_BEGIN_ALLOW_THREADS;
 
     // Main loop
     bool done = false;
     while (!done) {
-        // py::gil_scoped_release gil_release;
+        py::gil_scoped_release gil_release;
         // Starts the frame timer:
         int frame_start = SDL_GetTicks();
         // Poll and handle events (inputs, window resize, etc.)
@@ -231,7 +231,7 @@ int main(int argc, char** argv)
     }
 
     // Resuming control of the GIL for finalization:
-    Py_END_ALLOW_THREADS;
+    // Py_END_ALLOW_THREADS;
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

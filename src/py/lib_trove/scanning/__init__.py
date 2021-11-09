@@ -6,6 +6,7 @@ from pathlib import Path
 
 from sqlalchemy.engine import Engine
 
+from .. import db
 from ..db.tables import Video
 
 recognized_extensions = json.loads(
@@ -59,7 +60,7 @@ class FileScanner(BaseScanner):
         return "Processing..."
 
     def scan(self):
-        session = self.engine.get_session()
+        session = db.get_session(self.engine)
 
         for (
             s_path,
@@ -74,7 +75,7 @@ class FileScanner(BaseScanner):
                 search = session.query(Video).filter(Video.mrl == i.as_uri()).first()
                 if search is not None:
                     continue
-
+                    
                 nv = Video()
                 nv.mrl = i.as_uri()
                 nv.fname = i.name

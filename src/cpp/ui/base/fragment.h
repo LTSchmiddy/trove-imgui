@@ -1,6 +1,6 @@
-#ifndef UI_FRAGMENTS
-#define UI_FRAGMENTS
+#pragma once
 
+#include "../core.h"
 #include <imgui.h>
 #include <string>
 
@@ -45,5 +45,3 @@ public:
     void onDraw() override;
 };
 }
-
-#endif

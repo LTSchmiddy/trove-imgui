@@ -40,22 +40,19 @@ namespace UI {
     void MoviePane::onDraw(){
         if (ImGui::Button("Test Scan")) {
             PY_BEGIN_GIL_BLOCK;
-                PyObject_CallNoArgs(test_scan_function);
-                py_simple_error_check("Test scan failed!");
+            
             PY_END_GIL_BLOCK;
         }
 
         if (ImGui::Button("Test Module")) {
             PY_BEGIN_GIL_BLOCK;
-                PyObject_CallFunction(test_module_function, "O", main_window_module);
-                // PyObject_CallFunction(test_module_function, "s", "Test string");
-                py_simple_error_check("Test scan failed!");
+
             PY_END_GIL_BLOCK;
         }
 
     }
 
-    PyObject* MoviePane::test_function_2 (PyObject *self, PyObject *args) {
+    // PyObject* MoviePane::test_function_2 (PyObject *self, PyObject *args) {
 
-    }
+    // }
 }

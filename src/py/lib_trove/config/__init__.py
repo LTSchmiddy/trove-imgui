@@ -36,7 +36,7 @@ if is_source_version():
 # print(f"Is Build: {is_build_version()}")
 # print(f"Exec Dir: {exec_dir}")
 
-settings_file_name = "settings.json"
+settings_file_name = "trove_settings.json"
 
 global_settings_path = Path(sys.executable).parent.joinpath(settings_file_name)
 
@@ -56,11 +56,18 @@ def default_settings():
         }
     }
 
-current = default_settings()
-
-
-def load_settings(path: str = global_settings_path, settings_dict: dict = current):
-
+# Removing the old global settings stuff, since I want lib_trove to support multi-instancing:
+# current = default_settings()
+def load(path: str|Path = None, settings_dict: dict = None):
+    if path is None:
+        path = global_settings_path
+    
+    elif isinstance(path, Path):
+        path = str(path)
+    
+    if settings_dict is None:
+        settings_dict = default_settings()
+        
     def recursive_load_list(main: list, loaded: list):
         for i in range(0, max(len(main), len(loaded))):
             # Found in both:
@@ -74,7 +81,6 @@ def load_settings(path: str = global_settings_path, settings_dict: dict = curren
             # Found in main only:
             elif i < len(loaded):
                 main.append(loaded[i])
-
 
     def recursive_load_dict(main: dict, loaded: dict):
         new_update_dict = {}
@@ -105,12 +111,23 @@ def load_settings(path: str = global_settings_path, settings_dict: dict = curren
             print (color(f"CRITICAL ERROR IN LOADING SETTINGS: {e}", fg='red'))
             print (color("Using default settings...", fg='yellow'))
         
-        
     # settings file not found
     else:
-        save_settings(path, settings_dict)
+        save(settings_dict, path)
+        
+    return settings_dict
 
-def save_settings(path: str = global_settings_path, settings_dict: dict = current):
+
+def save(settings_dict: dict = None, path: str = global_settings_path):
+    if path is None:
+        path = global_settings_path
+    
+    elif isinstance(path, Path):
+        path = str(path)
+    
+    if settings_dict is None:
+        settings_dict = default_settings()
+    
     outfile = open(path, "w")
     json.dump(settings_dict, outfile, indent=4)
     outfile.close()

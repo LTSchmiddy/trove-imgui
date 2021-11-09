@@ -9,8 +9,7 @@ namespace fs = boost::filesystem;
 
 // Public values:
 PyObject* main_module;
-PyObject* test_scan_function;
-PyObject* test_module_function;
+PyObject* lib_trove_instance;
 
 // Private values:
 PyObject* debug_module;
@@ -82,10 +81,8 @@ bool init_python() {
     // Getting important functions:
     init_function = PyObject_GetAttrString(main_module, "init"); // New Reference
     shutdown_function = PyObject_GetAttrString(main_module, "shutdown"); // New Reference
-    test_scan_function = PyObject_GetAttrString(main_module, "test_scan"); // New Reference
-    test_module_function = PyObject_GetAttrString(main_module, "test_module"); // New Reference
 
-    PyObject_CallNoArgs(init_function);
+    lib_trove_instance = PyObject_CallNoArgs(init_function);
 
     if(py_simple_error_check("FATAL ERROR: Python initialization code has failed.")) {
         return false;
@@ -95,7 +92,7 @@ bool init_python() {
 }
 
 
-// Cleaning up python:
+// Cleaning up Python:
 void shutdown_python() {
     if (debug_module != NULL) {
         Py_DECREF(debug_module);
@@ -103,6 +100,7 @@ void shutdown_python() {
 
     PyObject_CallNoArgs(shutdown_function);
 
+    Py_DECREF(lib_trove_instance);
     Py_DECREF(init_function);
     Py_DECREF(shutdown_function);
     

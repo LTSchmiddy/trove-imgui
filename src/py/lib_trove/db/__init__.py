@@ -4,23 +4,25 @@ from sqlalchemy import *
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm.decl_api import DeclarativeMeta
+from sqlalchemy.sql.schema import MetaData
 
-from .. import settings
-
-# Base: sqlalchemy.ext.declarative.api.DeclarativeMeta = declarative_base()
-Base = declarative_base()
+Base: DeclarativeMeta = declarative_base()
 metadata: MetaData = Base.metadata
-db_engine: Engine = None
 
 from . import tables
-
-def init(reset=False):
-    global Session, db_engine
-    db_engine = create_engine(settings.current["db"]["connection-string"])
+# def init(connection_string: str = None, reset=False):
+#     global db_engine    
+#     db_engine = create_engine(connection_string, reset)
+    
+def new_engine(connection_string: str, reset=False):   
+    engine = create_engine(connection_string)
     if reset:
-        metadata.drop_all(db_engine)
-    metadata.create_all(db_engine)
+        metadata.drop_all(engine)
+    metadata.create_all(engine)
+    
+    return engine
 
-def get_session():
-    return scoped_session(sessionmaker(bind=db_engine))
+def get_session(engine: Engine = None):
+    return scoped_session(sessionmaker(bind=engine))
 

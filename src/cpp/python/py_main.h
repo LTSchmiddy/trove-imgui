@@ -1,7 +1,13 @@
 #pragma once
 
+// Includes:
 #include <Python.h>
 #include <string>
+#include <pybind11/pybind11.h>
+#include <pybind11/embed.h>
+
+// Namespaces
+namespace py = pybind11;
 
 // Macros:
 #ifdef _WIN64
@@ -18,11 +24,22 @@
 #define PY_BEGIN_GIL_BLOCK {PyGILState_STATE _gil_state = PyGILState_Ensure();
 #define PY_END_GIL_BLOCK PyGILState_Release(_gil_state);}
 
+// Apparently, pybind11 has problems when py::objects are still in memory after interpreter shutdown.
+// This makes it a LOT easier to set py::objects as pointers, so they can be deleted manually.
+struct pyow {
+   py::object m;
+};
+
 // Variables:
-extern PyObject* main_module;
-extern PyObject* lib_trove_instance;
+// extern PyObject* main_module;
+// extern PyObject* lib_trove_instance;
+
+extern pyow* main_module;
+extern pyow* lib_trove_instance;
+
+
 
 // Functions:
 bool py_simple_error_check(std::string error_message = "");
-bool init_python();
+bool init_python(int argc, char** argv);
 void shutdown_python();

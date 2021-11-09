@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-
 #include <vlc.hpp>
 
 #include "ui/core.h"
@@ -14,7 +13,6 @@ struct AppGlobal {
     SDL_GLContext gl_context;
     VLC::Instance* vlc;
     bool show_demo_window = false;
-
 };
 
 extern AppGlobal APP_GLOBAL;

@@ -24,7 +24,10 @@ class TroveInstance:
         self.scanners = scanning.load_scanners(self.engine, self.config["sources"])
         
         print("Instance loaded...")
-        
+    
+    def test_method(self):
+        print("HELLO")
+    
     def shutdown(self):
         config.save(self.config)
         print("Instance exited...")

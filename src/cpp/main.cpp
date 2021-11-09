@@ -25,11 +25,11 @@ void init_vlc() {
 }
 
 // Main code
-int main(int, char**)
+int main(int argc, char** argv)
 {
     // Initialize Python Interpreter:
     std::cout << "\n\n\n ===== Trove - Begin Log: ===== "  << std::endl;
-    if (!init_python()) {
+    if (!init_python(argc, argv)) {
         std::cerr << "FATAL ERROR: Python interpreter failed to load. Trove is exiting..." << std::endl;
         return -1;
     }
@@ -131,7 +131,7 @@ int main(int, char**)
     bool done = false;
     while (!done)
     {   
-        
+        // py::gil_scoped_release gil_release;
         // Starts the frame timer:
         int frame_start = SDL_GetTicks();
         // Poll and handle events (inputs, window resize, etc.)
@@ -139,6 +139,13 @@ int main(int, char**)
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+
+        // Background Tasks:
+        for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
+            auto fragment = APP_GLOBAL.fragments.at(i);
+            fragment->onBackground();
+        }
+
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -179,12 +186,6 @@ int main(int, char**)
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (APP_GLOBAL.show_demo_window) {
             ImGui::ShowDemoWindow(&APP_GLOBAL.show_demo_window);
-        }
-
-        // Background Tasks:
-        for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
-            auto fragment = APP_GLOBAL.fragments.at(i);
-            fragment->onBackground();
         }
 
         for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {

@@ -11,8 +11,10 @@ namespace UI {
 
     MoviePane::MoviePane() {
 
+        std::function<PyObject*(PyObject*, PyObject*)> F([this](PyObject *self, PyObject *args){ return PyLong_FromLong(99); });
+
         main_window_methods_def = new PyMethodDef[2]{
-            {"test_function",  test_function, METH_VARARGS, "Testing 1 2 3..."},
+            {"test_function", test_function, METH_VARARGS, "Testing 1 2 3..."},
             // {"test_function",  [this](PyObject *self, PyObject *args)-> PyObject* {}, METH_VARARGS, "Testing 1 2 3..."},
             {NULL, NULL, 0, NULL}        /* Sentinel */
         };
@@ -30,24 +32,22 @@ namespace UI {
 
     MoviePane::~MoviePane(){
         Py_DECREF(main_window_module);
-
     }
 
     bool MoviePane::onEvent(SDL_Event* event){
         return false;
     }
+
     void MoviePane::onBackground(){}
+
     void MoviePane::onDraw(){
         if (ImGui::Button("Test Scan")) {
-            PY_BEGIN_GIL_BLOCK;
-            
-            PY_END_GIL_BLOCK;
+            py::gil_scoped_acquire gil;
+            lib_trove_instance->m.attr("test_method")();
         }
 
         if (ImGui::Button("Test Module")) {
-            PY_BEGIN_GIL_BLOCK;
 
-            PY_END_GIL_BLOCK;
         }
 
     }

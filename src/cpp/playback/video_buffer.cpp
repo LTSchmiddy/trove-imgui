@@ -1,24 +1,25 @@
 #include "video_buffer.h"
 
-
 // VLC Rendering Callbacks:
-void* video_lock_callback(void* object, void** planes) {
+void* video_lock_callback(void* object, void** planes)
+{
     VideoBuffer* vb = (VideoBuffer*)object;
     vb->bufferMutex.lock();
     planes[0] = (void*)vb->buffer;
     return NULL;
-
 }
 
-void video_unlock_callback(void* object, void* picture, void* const* planes) {
+void video_unlock_callback(void* object, void* picture, void* const* planes)
+{
     VideoBuffer* vb = (VideoBuffer*)object;
     vb->needs_update = true;
     vb->bufferMutex.unlock();
 }
 
-void video_display_callback(void* object, void* picture) {}
+void video_display_callback(void* object, void* picture) { }
 
-unsigned setup_video(void** object, char* chroma, unsigned* width, unsigned* height, unsigned* pitches, unsigned* lines) {
+unsigned setup_video(void** object, char* chroma, unsigned* width, unsigned* height, unsigned* pitches, unsigned* lines)
+{
     VideoBuffer* vb = (VideoBuffer*)object;
 
     std::cout << "W: " << (*width) << "\n";
@@ -30,22 +31,19 @@ unsigned setup_video(void** object, char* chroma, unsigned* width, unsigned* hei
     int pb_size = (*width) * (*height) * 3;
     vb->buffer = new unsigned char[pb_size];
 
-
-
     return 1;
 }
-void cleanup_video(void* object) {
+void cleanup_video(void* object)
+{
     VideoBuffer* vb = (VideoBuffer*)object;
     // delete vb->buffer;
 }
 
-
-
-
 // Class Methods:
-VideoBuffer::VideoBuffer(VLC::MediaPlayer* p_player) {
+VideoBuffer::VideoBuffer(VLC::MediaPlayer* p_player)
+{
     player = p_player;
-    
+
     glGenTextures(1, &tex);
 
     w = 640;
@@ -56,21 +54,20 @@ VideoBuffer::VideoBuffer(VLC::MediaPlayer* p_player) {
 
     libvlc_video_set_callbacks(player->get(), video_lock_callback, video_unlock_callback, video_display_callback, this);
     // libvlc_video_set_format_callbacks(player->get(), setup_video, cleanup_video);
-    player->setVideoFormat("RV24", 640, 480, 640*3);
-    
-
+    player->setVideoFormat("RV24", 640, 480, 640 * 3);
 }
 
-VideoBuffer::~VideoBuffer() {}
+VideoBuffer::~VideoBuffer() { }
 
-void VideoBuffer::render() {
-    if(bufferMutex.try_lock()) {
-        if(needs_update) {
+void VideoBuffer::render()
+{
+    if (bufferMutex.try_lock()) {
+        if (needs_update) {
             // Supposed to construct the video output as a openGL texture. Doesn't seem to be working.
-            // By dumping the pixel buffer to a file, and a python script to re-assemble the bytes 
+            // By dumping the pixel buffer to a file, and a python script to re-assemble the bytes
             // into RGB pixels and save the resulting image, I can confirm that pixelBuffer does correctly
             // hold the video data, meaning that the problem is entirely in rendering with opengl/imgui.
-            
+
             glBindTexture(GL_TEXTURE_2D, tex);
 
             // Setup filtering parameters for display.
@@ -92,6 +89,7 @@ void VideoBuffer::render() {
     }
 }
 
-ImTextureID VideoBuffer::as_imgui_image(){
+ImTextureID VideoBuffer::as_imgui_image()
+{
     return (void*)(intptr_t)tex;
 }

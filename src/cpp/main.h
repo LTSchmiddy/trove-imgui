@@ -3,8 +3,8 @@
 #include <vector>
 #include <vlc.hpp>
 
-#include "ui/core.h"
 #include "ui/base/fragment.h"
+#include "ui/core.h"
 
 struct AppGlobal {
     int target_fps = 60;

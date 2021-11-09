@@ -10,15 +10,16 @@ exec_dir, exec_file = os.path.split(os.path.abspath(sys.argv[0]))
 exec_dir = exec_dir.replace("\\", "/")
 
 # determine if application is a script file or frozen exe
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     exec_dir = os.path.dirname(sys.executable)
 # elif __file__:
-    # exec_dir = os.path.dirname(__file__)
+# exec_dir = os.path.dirname(__file__)
 
 # If we're executing as the source version, the main .py file  is actually found in the `src` subdirectory
 # of the project, and `exec_dir` is changed to reflect that. We'll create `exec_file_dir` in case we actually need the
 # unmodified path to that script. Obviously, in build mode, these two values will be the same.
 exec_file_dir = exec_dir
+
 
 def is_build_version():
     return exec_file.endswith(".exe")
@@ -43,31 +44,28 @@ global_settings_path = Path(sys.executable).parent.joinpath(settings_file_name)
 
 def default_settings():
     return {
-        "db": {
-            "connection-string": "sqlite:///library.db"
-        },
+        "db": {"connection-string": "sqlite:///library.db"},
         "sources": {
             "local": {
                 "scanner": "FileScanner",
-                "scan_config": {
-                    "root_path": "F:/Videos"
-                }
+                "scan_config": {"root_path": "F:/Videos"},
             }
-        }
+        },
     }
+
 
 # Removing the old global settings stuff, since I want lib_trove to support multi-instancing:
 # current = default_settings()
-def load(path: str|Path = None, settings_dict: dict = None):
+def load(path: str | Path = None, settings_dict: dict = None):
     if path is None:
         path = global_settings_path
-    
+
     elif isinstance(path, Path):
         path = str(path)
-    
+
     if settings_dict is None:
         settings_dict = default_settings()
-        
+
     def recursive_load_list(main: list, loaded: list):
         for i in range(0, max(len(main), len(loaded))):
             # Found in both:
@@ -93,7 +91,7 @@ def load(path: str|Path = None, settings_dict: dict = None):
                 recursive_load_list(value, loaded[key])
             else:
                 new_update_dict[key] = loaded[key]
-        
+
         # Load settings added to file:
         for key, value in loaded.items():
             if not (key in main):
@@ -108,28 +106,26 @@ def load(path: str|Path = None, settings_dict: dict = None):
             # current.update(imported_settings)
             recursive_load_dict(settings_dict, imported_settings)
         except json.decoder.JSONDecodeError as e:
-            print (color(f"CRITICAL ERROR IN LOADING SETTINGS: {e}", fg='red'))
-            print (color("Using default settings...", fg='yellow'))
-        
+            print(color(f"CRITICAL ERROR IN LOADING SETTINGS: {e}", fg="red"))
+            print(color("Using default settings...", fg="yellow"))
+
     # settings file not found
     else:
         save(settings_dict, path)
-        
+
     return settings_dict
 
 
 def save(settings_dict: dict = None, path: str = global_settings_path):
     if path is None:
         path = global_settings_path
-    
+
     elif isinstance(path, Path):
         path = str(path)
-    
+
     if settings_dict is None:
         settings_dict = default_settings()
-    
+
     outfile = open(path, "w")
     json.dump(settings_dict, outfile, indent=4)
     outfile.close()
-
-

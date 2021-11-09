@@ -4,15 +4,16 @@
 #include "../main.h"
 // using namespace ImGui;
 
-void construct_menu_bar() {
-    if (ImGui::BeginMainMenuBar()){
+void construct_menu_bar()
+{
+    if (ImGui::BeginMainMenuBar()) {
 
         if (ImGui::BeginMenu("File")) {
             ImGui::MenuItem("HELLO", NULL, false);
             if (APP_GLOBAL.vlc == NULL && ImGui::Button("Load VLC")) {
                 init_vlc();
             }
-            
+
             ImGui::EndMenu();
         }
 

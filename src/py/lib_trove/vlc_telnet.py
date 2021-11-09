@@ -11,15 +11,17 @@ class VLCProcess(Popen):
     host: str
     port: int
     password: uuid.UUID
-    
+
     connection: VLCTelnet
-    
-    def __init__ (self, *args, **kwargs):
-        self.path = Path(sys.executable).parent.joinpath("vlc.exe" if os.name == "nt" else "vlc")
+
+    def __init__(self, *args, **kwargs):
+        self.path = Path(sys.executable).parent.joinpath(
+            "vlc.exe" if os.name == "nt" else "vlc"
+        )
         self.host = "localhost"
         self.port = 4212
-        self.password = str(uuid.uuid4()).replace('-', "_")
-        
+        self.password = str(uuid.uuid4()).replace("-", "_")
+
         super().__init__(
             [
                 self.path,
@@ -28,16 +30,11 @@ class VLCProcess(Popen):
                 f"--extraintf=telnet",
                 f"--telnet-host={self.host}",
                 f"--telnet-port={self.port}",
-                f"--telnet-password={self.password}"
+                f"--telnet-password={self.password}",
             ]
         )
 
         self.connection = self.create_telnet_control()
-        
-    
+
     def create_telnet_control(self) -> VLCTelnet:
-        return VLCTelnet(
-            host=self.host,
-            port=self.port,
-            password=str(self.password)
-        )
+        return VLCTelnet(host=self.host, port=self.port, password=str(self.password))

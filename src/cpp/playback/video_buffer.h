@@ -7,22 +7,20 @@
 #include "../ui/core.h"
 
 class VideoBuffer {
-    public:
-        
-        int w, h;
-        bool needs_update;
-        unsigned char* buffer;
-        VLC::MediaPlayer* player;
-        std::mutex bufferMutex;
+public:
+    int w, h;
+    bool needs_update;
+    unsigned char* buffer;
+    VLC::MediaPlayer* player;
+    std::mutex bufferMutex;
 
-        GLuint tex;
+    GLuint tex;
 
-        VideoBuffer(VLC::MediaPlayer* p_player);
-        ~VideoBuffer();
-        void allocate();
-        
-        void render();
+    VideoBuffer(VLC::MediaPlayer* p_player);
+    ~VideoBuffer();
+    void allocate();
 
-        ImTextureID as_imgui_image();
+    void render();
 
+    ImTextureID as_imgui_image();
 };

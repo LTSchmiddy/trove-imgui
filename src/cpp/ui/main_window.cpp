@@ -4,31 +4,26 @@
 // #include <vlc.hpp>
 
 namespace UI {
-MainWindow::MainWindow()
-{
+MainWindow::MainWindow() {
     movie_pane = new MoviePane();
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete movie_pane;
 }
 
-bool MainWindow::onEvent(SDL_Event* event)
-{
+bool MainWindow::onEvent(SDL_Event* event) {
     if (movie_pane->onEvent(event)) {
         return true;
     }
 
     return false;
 }
-void MainWindow::onBackground()
-{
+void MainWindow::onBackground() {
     movie_pane->onBackground();
 }
 
-void MainWindow::onDraw()
-{
+void MainWindow::onDraw() {
     bool show = true;
     int w, h;
     SDL_GetWindowSize(APP_GLOBAL.window, &w, &h);

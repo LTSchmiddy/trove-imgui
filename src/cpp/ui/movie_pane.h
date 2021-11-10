@@ -8,14 +8,18 @@
 #include "python/py_main.h"
 
 namespace UI {
-struct VideoUIData {
-    int id;
-    std::string mrl;
-    std::string name;
-    std::string desc;
-    std::string source;
+class VideoControl : public Fragment {
+public:
 
-    VideoUIData(int p_id, std::string p_mrl, std::string name, std::string desc, std::string source);
+    int id;
+    std::string name;
+
+    VideoControl(int p_id, std::string name);
+    void onDraw() override;
+    
+private:
+    bool expanded = false;
+
 };
 
 class MoviePane : public Fragment {
@@ -26,9 +30,10 @@ public:
     void onBackground() override;
     void onDraw() override;
 
-    void drawVideoData(VideoUIData *v);
+    void drawVideoData(VideoControl* v);
+
 private:
-    std::vector<VideoUIData> video_data;
+    std::vector<VideoControl> video_data;
     py::cpp_function scan_callback;
     void updateDisplay();
 };

@@ -13,6 +13,7 @@ struct AppGlobal {
     SDL_GLContext gl_context;
     VLC::Instance* vlc;
     bool show_demo_window = false;
+    bool show_style_window = false;
 };
 
 extern AppGlobal APP_GLOBAL;

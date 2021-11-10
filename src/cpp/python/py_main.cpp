@@ -23,8 +23,7 @@ pyow* mod_type;
 
 // We own these all of these references.
 
-bool py_simple_error_check(std::string error_message)
-{
+bool py_simple_error_check(std::string error_message) {
     if (PyErr_Occurred() != NULL) {
         // This implies that an error has occured.
 
@@ -37,8 +36,7 @@ bool py_simple_error_check(std::string error_message)
     return false;
 }
 
-bool init_python(int argc, char** argv)
-{
+bool init_python(int argc, char** argv) {
     // Getting Paths for various python components:
     fs::path lib_dir = boost::dll::program_location().parent_path().append("Lib");
     fs::path site_dir = boost::dll::program_location().parent_path().append("Lib/site-packages");
@@ -102,8 +100,7 @@ bool init_python(int argc, char** argv)
 }
 
 // Cleaning up Python:
-void shutdown_python()
-{
+void shutdown_python() {
     if (debug_module != NULL) {
         delete debug_module;
     }
@@ -117,5 +114,5 @@ void shutdown_python()
 }
 
 py::module_ create_py_module(const char* mod_name) {
-    return (py::module_) mod_type->o("mod_name");
+    return (py::module_)mod_type->o("mod_name");
 }

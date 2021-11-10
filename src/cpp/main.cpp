@@ -14,8 +14,7 @@
 
 AppGlobal APP_GLOBAL = {};
 
-void init_vlc()
-{
+void init_vlc() {
     std::cout << "Loading VLC..." << std::endl;
     std::cout << "LibVLC was compiled with: " << libvlc_get_compiler()
               << std::endl;
@@ -24,8 +23,7 @@ void init_vlc()
 }
 
 // Main code
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     // Initialize Python Interpreter:
     std::cout << "\n\n\n ===== Trove - Begin Log: ===== " << std::endl;
     if (!init_python(argc, argv)) {
@@ -204,6 +202,12 @@ int main(int argc, char** argv)
         // ImGui!).
         if (APP_GLOBAL.show_demo_window) {
             ImGui::ShowDemoWindow(&APP_GLOBAL.show_demo_window);
+        }        
+        
+        if (APP_GLOBAL.show_style_window) {
+            ImGui::Begin("Style Editor", &APP_GLOBAL.show_style_window);
+            ImGui::ShowStyleEditor();
+            ImGui::End();
         }
 
         for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {

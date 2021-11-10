@@ -1,7 +1,6 @@
 #include "player.h"
 
 namespace UI {
-void VideoPlayer::onDraw()
-{
+void VideoPlayer::onDraw() {
 }
 }

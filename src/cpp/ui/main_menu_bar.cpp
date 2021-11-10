@@ -4,8 +4,7 @@
 #include "../main.h"
 // using namespace ImGui;
 
-void construct_menu_bar()
-{
+void construct_menu_bar() {
     if (ImGui::BeginMainMenuBar()) {
 
         if (ImGui::BeginMenu("File")) {
@@ -13,7 +12,9 @@ void construct_menu_bar()
             if (APP_GLOBAL.vlc == NULL && ImGui::Button("Load VLC")) {
                 init_vlc();
             }
-
+            
+            ImGui::Checkbox("Show Demo Window", &APP_GLOBAL.show_demo_window);
+            ImGui::Checkbox("Show Style Window", &APP_GLOBAL.show_style_window);
             ImGui::EndMenu();
         }
 

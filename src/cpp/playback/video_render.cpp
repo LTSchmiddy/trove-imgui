@@ -1,8 +1,7 @@
 #include "video_render.h"
 #include "../main.h"
 
-bool output_setup(void** opaque, const libvlc_video_setup_device_cfg_t* cfg, libvlc_video_setup_device_info_t* out)
-{
+bool output_setup(void** opaque, const libvlc_video_setup_device_cfg_t* cfg, libvlc_video_setup_device_info_t* out) {
     VideoRender* vr = *(VideoRender**)opaque;
 
     vr->width = 0;
@@ -10,21 +9,18 @@ bool output_setup(void** opaque, const libvlc_video_setup_device_cfg_t* cfg, lib
 
     return true;
 }
-void output_cleanup(void* opaque)
-{
+void output_cleanup(void* opaque) {
     VideoRender* vr = *(VideoRender**)opaque;
     glDeleteTextures(1, &vr->texture);
 }
 
-void recieve_resize_callback(void* opaque, void (*report_size_change)(void* report_opaque, unsigned width, unsigned height), void* report_opaque)
-{
+void recieve_resize_callback(void* opaque, void (*report_size_change)(void* report_opaque, unsigned width, unsigned height), void* report_opaque) {
     VideoRender* vr = (VideoRender*)opaque;
 
     vr->report_resize = report_size_change;
 }
 
-bool update_output(void* opaque, const libvlc_video_render_cfg_t* cfg, libvlc_video_output_cfg_t* output)
-{
+bool update_output(void* opaque, const libvlc_video_render_cfg_t* cfg, libvlc_video_output_cfg_t* output) {
     VideoRender* vr = (VideoRender*)opaque;
     if (cfg->width != vr->width || cfg->height != vr->height) {
         output_cleanup(opaque);
@@ -56,14 +52,12 @@ bool update_output(void* opaque, const libvlc_video_render_cfg_t* cfg, libvlc_vi
     return true;
 }
 
-void video_swap(void* opaque)
-{
+void video_swap(void* opaque) {
     VideoRender* vr = (VideoRender*)opaque;
     // vr->bufferMutex.unlock();
 }
 
-bool make_current(void* opaque, bool current)
-{
+bool make_current(void* opaque, bool current) {
     VideoRender* vr = *(VideoRender**)opaque;
     return true;
     // if (current)
@@ -71,24 +65,20 @@ bool make_current(void* opaque, bool current)
     // else
     //     return SDL_GL_MakeCurrent(APP_GLOBAL.window, APP_GLOBAL.gl_context) == 0;
 }
-void* get_proc_address(void* opaque, const char* fct_name)
-{
+void* get_proc_address(void* opaque, const char* fct_name) {
 
     return SDL_GL_GetProcAddress(fct_name);
 }
 
-void frame_metadata(void* opaque, libvlc_video_metadata_type_t type, const void* metadata)
-{
+void frame_metadata(void* opaque, libvlc_video_metadata_type_t type, const void* metadata) {
 }
 
-bool select_plane(void* opaque, size_t plane, void* output)
-{
+bool select_plane(void* opaque, size_t plane, void* output) {
 
     return true;
 }
 
-VideoRender::VideoRender(VLC::MediaPlayer* p_player)
-{
+VideoRender::VideoRender(VLC::MediaPlayer* p_player) {
     player = p_player;
 
     SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
@@ -111,7 +101,6 @@ VideoRender::VideoRender(VLC::MediaPlayer* p_player)
 
 VideoRender::~VideoRender() { }
 
-ImTextureID VideoRender::as_imgui_image()
-{
+ImTextureID VideoRender::as_imgui_image() {
     return (void*)(intptr_t)texture;
 }

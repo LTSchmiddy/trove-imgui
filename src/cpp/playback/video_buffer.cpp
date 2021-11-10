@@ -1,16 +1,14 @@
 #include "video_buffer.h"
 
 // VLC Rendering Callbacks:
-void* video_lock_callback(void* object, void** planes)
-{
+void* video_lock_callback(void* object, void** planes) {
     VideoBuffer* vb = (VideoBuffer*)object;
     vb->bufferMutex.lock();
     planes[0] = (void*)vb->buffer;
     return NULL;
 }
 
-void video_unlock_callback(void* object, void* picture, void* const* planes)
-{
+void video_unlock_callback(void* object, void* picture, void* const* planes) {
     VideoBuffer* vb = (VideoBuffer*)object;
     vb->needs_update = true;
     vb->bufferMutex.unlock();
@@ -18,8 +16,7 @@ void video_unlock_callback(void* object, void* picture, void* const* planes)
 
 void video_display_callback(void* object, void* picture) { }
 
-unsigned setup_video(void** object, char* chroma, unsigned* width, unsigned* height, unsigned* pitches, unsigned* lines)
-{
+unsigned setup_video(void** object, char* chroma, unsigned* width, unsigned* height, unsigned* pitches, unsigned* lines) {
     VideoBuffer* vb = (VideoBuffer*)object;
 
     std::cout << "W: " << (*width) << "\n";
@@ -33,15 +30,13 @@ unsigned setup_video(void** object, char* chroma, unsigned* width, unsigned* hei
 
     return 1;
 }
-void cleanup_video(void* object)
-{
+void cleanup_video(void* object) {
     VideoBuffer* vb = (VideoBuffer*)object;
     // delete vb->buffer;
 }
 
 // Class Methods:
-VideoBuffer::VideoBuffer(VLC::MediaPlayer* p_player)
-{
+VideoBuffer::VideoBuffer(VLC::MediaPlayer* p_player) {
     player = p_player;
 
     glGenTextures(1, &tex);
@@ -59,8 +54,7 @@ VideoBuffer::VideoBuffer(VLC::MediaPlayer* p_player)
 
 VideoBuffer::~VideoBuffer() { }
 
-void VideoBuffer::render()
-{
+void VideoBuffer::render() {
     if (bufferMutex.try_lock()) {
         if (needs_update) {
             // Supposed to construct the video output as a openGL texture. Doesn't seem to be working.
@@ -89,7 +83,6 @@ void VideoBuffer::render()
     }
 }
 
-ImTextureID VideoBuffer::as_imgui_image()
-{
+ImTextureID VideoBuffer::as_imgui_image() {
     return (void*)(intptr_t)tex;
 }

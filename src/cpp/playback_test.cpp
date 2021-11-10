@@ -35,16 +35,14 @@ std::mutex vlcMutex;
 bool needUpdate = false;
 unsigned char* pixelBuffer = new unsigned char[pb_size];
 
-void* videoLockCallBack(void* object, void** planes)
-{
+void* videoLockCallBack(void* object, void** planes) {
 
     vlcMutex.lock();
     planes[0] = (void*)pixelBuffer;
     return NULL;
 }
 
-void videoUnlockCallback(void* object, void* picture, void* const* planes)
-{
+void videoUnlockCallback(void* object, void* picture, void* const* planes) {
     needUpdate = true;
     vlcMutex.unlock();
 }
@@ -72,8 +70,7 @@ void videoDisplayCallback(void* object, void* picture) { }
 // Simple helper function to load an image into a OpenGL texture with common
 // settings
 bool LoadTextureFromFile(const char* filename, GLuint* out_texture,
-    int* out_width, int* out_height)
-{
+    int* out_width, int* out_height) {
     // Load from file
     int image_width = 0;
     int image_height = 0;
@@ -110,8 +107,7 @@ bool LoadTextureFromFile(const char* filename, GLuint* out_texture,
 }
 
 bool LoadTextureFromData(const char* image_data, GLuint* out_texture,
-    int* out_width, int* out_height)
-{
+    int* out_width, int* out_height) {
     // Load from file
     int image_width = vw;
     int image_height = vh;
@@ -144,8 +140,7 @@ bool LoadTextureFromData(const char* image_data, GLuint* out_texture,
     return true;
 }
 
-void drawTestTexture(ImGuiIO& io)
-{
+void drawTestTexture(ImGuiIO& io) {
     ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
     ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
     ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // No tint
@@ -158,8 +153,7 @@ void drawTestTexture(ImGuiIO& io)
         tint_col, border_col);
 }
 
-void dumpBuffer(std::string f_name)
-{
+void dumpBuffer(std::string f_name) {
     std::fstream myfile;
     myfile.open(f_name, std::ios::out | std::ios::binary);
 
@@ -169,8 +163,7 @@ void dumpBuffer(std::string f_name)
 }
 
 // Main code
-int main(int, char**)
-{
+int main(int, char**) {
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling
     // issues on a minority of Windows systems, depending on whether

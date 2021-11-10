@@ -8,7 +8,7 @@ for path_name, dir_names, file_names in os.walk("./src/cpp/"):
     dirs: list[Path] = [path.joinpath(i) for i in dir_names]
     files: list[Path] = [path.joinpath(i) for i in file_names]
     
-    print(f"{path}")
+    # print(f"{path}")
     
     subprocess.run(
         [

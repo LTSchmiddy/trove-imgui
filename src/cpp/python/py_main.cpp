@@ -16,7 +16,7 @@ pymw* debug_module;
 // Public values:
 // PyObject* main_module;
 // PyObject* lib_trove_instance;
-pymw* main_module;
+pymw* py_main_module;
 pyow* lib_trove_instance;
 
 pyow* mod_type;
@@ -85,14 +85,14 @@ bool init_python(int argc, char** argv)
     py_simple_error_check("Python debug module has failed to load. Skipping...");
     Py_DECREF(main_mod_ptr);
 
-    main_module = new pymw { py::module_::import("main") }; // New Reference
+    py_main_module = new pymw { py::module_::import("main") }; // New Reference
 
     if (py_simple_error_check("FATAL ERROR: Python 'main' module has failed to load.")) {
         return false;
     }
 
     // Getting important functions:
-    lib_trove_instance = new pyow { main_module->m.attr("init")() };
+    lib_trove_instance = new pyow { py_main_module->m.attr("init")() };
 
     if (py_simple_error_check("FATAL ERROR: Python initialization code has failed.")) {
         return false;
@@ -108,10 +108,10 @@ void shutdown_python()
         delete debug_module;
     }
 
-    main_module->m.attr("shutdown");
+    py_main_module->m.attr("shutdown");
 
     delete lib_trove_instance;
-    delete main_module;
+    delete py_main_module;
 
     py::finalize_interpreter();
 }

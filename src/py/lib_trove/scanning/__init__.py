@@ -38,7 +38,7 @@ class BaseScanner:
     def get_status_text(self) -> str:
         return "Processing..."
 
-    def run(self):
+    def scan_async(self):
         print("TRYING TO RUN...")
         self.thread = threading.Thread(None, self.scan, name=self.get_type_name())
         self.thread.start()
@@ -70,8 +70,12 @@ class FileScanner(BaseScanner):
             path = Path(s_path)
             dirs = [path.joinpath(i) for i in s_dirs]
             files = [path.joinpath(i) for i in s_files]
-
+            
             for i in files:
+                print(f"{i.suffix=}")
+                if i.suffix.upper() not in [x.upper() for x in recognized_extensions.keys()]:
+                    continue
+                
                 search = session.query(Video).filter(Video.mrl == i.as_uri()).first()
                 if search is not None:
                     continue

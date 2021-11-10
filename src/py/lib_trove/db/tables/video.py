@@ -8,7 +8,8 @@ class Video(db.Base):
     __tablename__ = "video"
 
     # Item Common
-    mrl = Column(String, primary_key=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    mrl = Column(String, unique=True)
     fname = Column(String)
     description = Column(String)
 

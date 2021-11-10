@@ -2,9 +2,9 @@
 
 // Includes:
 #include <Python.h>
-#include <pybind11/embed.h>
-#include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/functional.h>
+#include <pybind11/embed.h>
 #include <string>
 
 // Namespaces
@@ -42,7 +42,7 @@ struct pymw {
 // extern PyObject* main_module;
 // extern PyObject* lib_trove_instance;
 
-extern pymw* main_module;
+extern pymw* py_main_module;
 extern pyow* lib_trove_instance;
 
 // Functions:

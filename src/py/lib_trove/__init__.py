@@ -1,5 +1,7 @@
 from pathlib import Path
 from typing import Any
+from threading import Thread
+
 from sqlalchemy.engine import Engine
 
 from . import db
@@ -15,6 +17,8 @@ class TroveInstance:
 
     engine: Engine
     scanners: dict[str, scanning.BaseScanner]
+    
+    scan_thread: Thread
 
     def __init__(self, config_file: Path = None):
         self.config = config.load(config_file)
@@ -23,15 +27,24 @@ class TroveInstance:
 
         self.engine = db.new_engine(self.config["db"]["connection-string"])
         self.scanners = scanning.load_scanners(self.engine, self.config["sources"])
-
+        
+        self.scan_thread = None
+        
         print("Instance loaded...")
 
-    def scan_all(self, callback):
-        for name, scanner in self.scanners.items():
-            scanner.run()
-            
-        callback(f"ok then... {name}")
+    def scan_async(self, callback):
+        self.scan_thread = Thread(None, self.scan, "Scanner Thread", args=(callback,))
+        self.scan_thread.start()
 
+    def scan(self, callback):
+        for name, scanner in self.scanners.items():
+            scanner.scan()
+        
+        callback()
+    
+    def get_session(self):
+        return db.get_session(self.engine)
+    
     def shutdown(self):
         config.save(self.config)
         print("Instance exited...")

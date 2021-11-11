@@ -10,6 +10,7 @@
 
 #include "python/py_main.h"
 #include "ui/main_menu_bar.h"
+#include "ui/style_editor.h"
 #include "ui/main_window.h"
 
 AppGlobal APP_GLOBAL = {};
@@ -86,16 +87,13 @@ int main(int argc, char** argv) {
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
     APP_GLOBAL.window = window;
-    // Set up fps timer:
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    (void)io;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable
-    // Keyboard Controls io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //
-    // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // EnableKeyboard Controls 
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -205,9 +203,7 @@ int main(int argc, char** argv) {
         }        
         
         if (APP_GLOBAL.show_style_window) {
-            ImGui::Begin("Style Editor", &APP_GLOBAL.show_style_window);
-            ImGui::ShowStyleEditor();
-            ImGui::End();
+            UI::draw_style_window(&APP_GLOBAL.show_style_window);
         }
 
         for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {

@@ -72,7 +72,7 @@ class FileScanner(BaseScanner):
             files = [path.joinpath(i) for i in s_files]
             
             for i in files:
-                print(f"{i.suffix=}")
+                # print(f"{i.suffix=}")
                 if i.suffix.upper() not in [x.upper() for x in recognized_extensions.keys()]:
                     continue
                 

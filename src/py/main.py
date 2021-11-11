@@ -1,4 +1,4 @@
-import os
+import os, json
 
 from sqlalchemy.orm.scoping import scoped_session
 
@@ -7,6 +7,7 @@ from py import lib_trove
 
 lib_trove_instance: TroveInstance = None
 
+style_path = "./imgui_style.json"
 
 def init():
     global lib_trove_instance

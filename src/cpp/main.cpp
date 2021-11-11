@@ -10,17 +10,19 @@
 
 #include "python/py_main.h"
 #include "ui/main_menu_bar.h"
-#include "ui/style_editor.h"
-#include "ui/main_window.h"
+#include "ui/base/fragment.h"
+#include "ui/sub_windows/style_editor.h"
+#include "ui/sub_windows/py_console.h"
 
-AppGlobal APP_GLOBAL = {};
+
+AppGlobal g_AppGlobal = {};
 
 void init_vlc() {
     std::cout << "Loading VLC..." << std::endl;
     std::cout << "LibVLC was compiled with: " << libvlc_get_compiler()
               << std::endl;
     const char* vlcArgs[] = { "-vv", "--config=./vlc-config.cfg" };
-    APP_GLOBAL.vlc = new VLC::Instance(2, vlcArgs);
+    g_AppGlobal.vlc = new VLC::Instance(2, vlcArgs);
 }
 
 // Main code
@@ -82,11 +84,11 @@ int main(int argc, char** argv) {
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Window* window = SDL_CreateWindow("Trove", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         1280, 720, window_flags);
-    APP_GLOBAL.gl_context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, APP_GLOBAL.gl_context);
+    g_AppGlobal.gl_context = SDL_GL_CreateContext(window);
+    SDL_GL_MakeCurrent(window, g_AppGlobal.gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    APP_GLOBAL.window = window;
+    g_AppGlobal.window = window;
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -96,11 +98,13 @@ int main(int argc, char** argv) {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
+    ImGui::StyleColorsLight();
+    UI::load_style();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplSDL2_InitForOpenGL(window, APP_GLOBAL.gl_context);
+    ImGui_ImplSDL2_InitForOpenGL(window, g_AppGlobal.gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
@@ -129,8 +133,13 @@ int main(int argc, char** argv) {
 
     // ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
-    UI::MainWindow* main_window = new UI::MainWindow();
-    APP_GLOBAL.fragments.emplace_back(main_window);
+    g_AppGlobal.main_window = new UI::MainWindow();
+    g_AppGlobal.style_window = new UI::FWindow("Style Editor##style_window", new UI::StyleEditor(), true, false);
+    g_AppGlobal.py_console_window = new UI::FWindow("Python Console##python_console_window", new UI::PyConsole(), true, false);
+
+    g_AppGlobal.fragments.emplace_back(g_AppGlobal.main_window);
+    g_AppGlobal.fragments.emplace_back(g_AppGlobal.style_window);
+    g_AppGlobal.fragments.emplace_back(g_AppGlobal.py_console_window);
 
     // Releasing the GIL from this thread. We need this if we're gonna use threads
     // on the Python side. This also means that whenever we want to access the
@@ -155,8 +164,8 @@ int main(int argc, char** argv) {
         // flags.
 
         // Background Tasks:
-        for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
-            auto fragment = APP_GLOBAL.fragments.at(i);
+        for (int i = 0; i < g_AppGlobal.fragments.size(); i++) {
+            auto fragment = g_AppGlobal.fragments.at(i);
             fragment->onBackground();
         }
 
@@ -166,8 +175,8 @@ int main(int argc, char** argv) {
 
             // Allows fragments to consume events:
             bool consumed = false;
-            for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
-                auto fragment = APP_GLOBAL.fragments.at(i);
+            for (int i = 0; i < g_AppGlobal.fragments.size(); i++) {
+                auto fragment = g_AppGlobal.fragments.at(i);
 
                 if (fragment->onEvent(&event)) {
                     consumed = true;
@@ -198,16 +207,12 @@ int main(int argc, char** argv) {
         // 1. Show the big demo window (Most of the sample code is in
         // ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear
         // ImGui!).
-        if (APP_GLOBAL.show_demo_window) {
-            ImGui::ShowDemoWindow(&APP_GLOBAL.show_demo_window);
+        if (g_AppGlobal.show_demo_window) {
+            ImGui::ShowDemoWindow(&g_AppGlobal.show_demo_window);
         }        
-        
-        if (APP_GLOBAL.show_style_window) {
-            UI::draw_style_window(&APP_GLOBAL.show_style_window);
-        }
 
-        for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
-            auto fragment = APP_GLOBAL.fragments.at(i);
+        for (int i = 0; i < g_AppGlobal.fragments.size(); i++) {
+            auto fragment = g_AppGlobal.fragments.at(i);
             if (fragment->should_draw) {
                 fragment->onDraw();
             }
@@ -215,7 +220,7 @@ int main(int argc, char** argv) {
         // Before we render, we want to cap the frame rate, so that our cpu usage
         // doesn't run wild:
         int frame_end = SDL_GetTicks();
-        int delay_interval = (1000 / APP_GLOBAL.target_fps) - (frame_end - frame_start);
+        int delay_interval = (1000 / g_AppGlobal.target_fps) - (frame_end - frame_start);
         if (delay_interval > 0) {
             SDL_Delay(delay_interval);
         }
@@ -233,23 +238,28 @@ int main(int argc, char** argv) {
     // Resuming control of the GIL for finalization:
     // Py_END_ALLOW_THREADS;
 
+    UI::save_style();
+
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
-    for (int i = 0; i < APP_GLOBAL.fragments.size(); i++) {
-        auto fragment = APP_GLOBAL.fragments.at(i);
+    for (int i = 0; i < g_AppGlobal.fragments.size(); i++) {
+        auto fragment = g_AppGlobal.fragments.at(i);
         if (fragment->delete_during_cleanup) {
             delete fragment;
         }
     }
 
-    SDL_GL_DeleteContext(APP_GLOBAL.gl_context);
+    // g_AppGlobal pointers "main_window", "style_window", and "py_console_window" are
+    // already deleted with the rest of the fragments. Deleting again is not necessary.
+
+    SDL_GL_DeleteContext(g_AppGlobal.gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
-    delete APP_GLOBAL.vlc;
+    delete g_AppGlobal.vlc;
     shutdown_python();
     return 0;
 }

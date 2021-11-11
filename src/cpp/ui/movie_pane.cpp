@@ -24,6 +24,7 @@ void VideoControl::onDraw() {
 // MoviePane: 
 MoviePane::MoviePane() {
     scan_callback = py::cpp_function([this]() { this->updateDisplay(); });
+    updateDisplay();
 }
 
 MoviePane::~MoviePane() {
@@ -40,15 +41,14 @@ void MoviePane::onDraw() {
     if (ImGui::Button("Test Scan")) {
         py::gil_scoped_acquire gil;
         lib_trove_instance->o.attr("scan_async")(&scan_callback);
-
-        py_simple_error_check("fn_method_call_error");
     }
-
+    
+    ImGui::SameLine();
     if (ImGui::Button("Test Display")) {
         updateDisplay();
     }
 
-    
+    ImGui::Separator();
     for (int i = 0; i < video_data.size(); i++) {
         drawVideoData(&video_data[i]);
     }

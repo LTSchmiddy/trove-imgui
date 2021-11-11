@@ -3,8 +3,7 @@ target_sources(${TARGET_NAME}
     "./core.h"
     "./main_menu_bar.h"
     "./main_menu_bar.cpp"
-    "./style_editor.h"
-    "./style_editor.cpp"
+
     "./main_window.h"
     "./main_window.cpp"
     "./movie_pane.h"
@@ -13,3 +12,4 @@ target_sources(${TARGET_NAME}
 
 add_subdirectory("./base")
 add_subdirectory("./components")
+add_subdirectory("./sub_windows")

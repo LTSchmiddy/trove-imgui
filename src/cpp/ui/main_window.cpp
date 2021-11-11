@@ -26,7 +26,7 @@ void MainWindow::onBackground() {
 void MainWindow::onDraw() {
     bool show = true;
     int w, h;
-    SDL_GetWindowSize(APP_GLOBAL.window, &w, &h);
+    SDL_GetWindowSize(g_AppGlobal.window, &w, &h);
 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(w, h));

@@ -82,7 +82,7 @@ VideoRender::VideoRender(VLC::MediaPlayer* p_player) {
     player = p_player;
 
     SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-    ctx = SDL_GL_CreateContext(APP_GLOBAL.window);
+    ctx = SDL_GL_CreateContext(g_AppGlobal.window);
 
     bool success = libvlc_video_set_output_callbacks(
         player->get(),

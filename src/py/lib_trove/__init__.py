@@ -33,6 +33,10 @@ class TroveInstance:
         print("Instance loaded...")
 
     def scan_async(self, callback):
+        if self.scan_thread is not None and self.scan_thread.is_alive():
+            print("Already running a scan...")
+            
+        
         self.scan_thread = Thread(None, self.scan, "Scanner Thread", args=(callback,))
         self.scan_thread.start()
 

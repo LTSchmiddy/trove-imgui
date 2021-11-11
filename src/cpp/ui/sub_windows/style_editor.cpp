@@ -2,9 +2,20 @@
 
 #include <iostream>
 
-#include "../python/py_main.h"
-
 namespace UI {
+
+PYBIND11_EMBEDDED_MODULE(imgui_style, m) {
+    m.def("get_style", [](){
+        ImGuiStyle& s = ImGui::GetStyle();
+        return style_save_dict(&s);
+    });
+
+    m.def("set_style", [](py::dict d){
+        ImGuiStyle& s = ImGui::GetStyle();
+        style_load_dict(&s, d);
+    });
+}
+
 py::dict style_save_dict(ImGuiStyle* s) {
     py::dict d;
 
@@ -120,6 +131,10 @@ py::dict style_save_dict(ImGuiStyle* s) {
 }
 
 void style_load_dict(ImGuiStyle* s, py::dict d) {
+    if (d.empty()){
+        return;
+    }
+
     s->Alpha = d["Alpha"].cast<float>();
     s->DisabledAlpha = d["DisabledAlpha"].cast<float>();
 
@@ -204,7 +219,7 @@ void style_load_dict(ImGuiStyle* s, py::dict d) {
 
     // Loading Colors:
     py::list colors = d["_Colors"];
-    std::cout << "colors = " << py::str(colors).cast<std::string>() << std::endl;
+    // std::cout << "colors = " << py::str(colors).cast<std::string>() << std::endl;
     for (int i = 0; i < (int)ImGuiCol_COUNT; i++) {
         py::list color = colors[i];
         
@@ -215,28 +230,35 @@ void style_load_dict(ImGuiStyle* s, py::dict d) {
     }
 }
 
-void draw_style_window(bool* show_window) {
-    ImGuiStyle& s = ImGui::GetStyle();
-    
 
-    ImGui::Begin("Style Editor", show_window);
+void save_style() {
+    ImGuiStyle& s = ImGui::GetStyle();
+    py::gil_scoped_acquire gil;
+    py::module_ style_mod = py::module_::import("style_helper");
+    style_mod.attr("save_style_dict")(style_save_dict(&s));
+}
+
+void load_style() {
+    ImGuiStyle& s = ImGui::GetStyle();
+    py::gil_scoped_acquire gil;
+    py::module_ style_mod = py::module_::import("style_helper");
+    style_load_dict(&s, style_mod.attr("load_style_dict")());
+}
+
+void StyleEditor::onDraw() {
 
     if (ImGui::Button("Load Style")) {
-        py::gil_scoped_acquire gil;
-        py::module_ style_mod = py::module_::import("style_helper");
-        style_load_dict(&s, style_mod.attr("load_style")());
+        load_style();
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Save Style")) {
-        py::gil_scoped_acquire gil;
-        py::module_ style_mod = py::module_::import("style_helper");
-        style_mod.attr("save_style")(style_save_dict(&s));
-
+        save_style();
     }
 
     ImGui::Separator();
     ImGui::ShowStyleEditor();
-    ImGui::End();
 }
 }
+
+

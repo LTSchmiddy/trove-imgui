@@ -37,6 +37,10 @@ void FWindow::onBackground() {
 }
 
 void FWindow::onDraw() {
+    if (!open) {
+        return;
+    }
+
     ImGui::Begin(id.c_str(), &open, flags);
     content->onDraw();
     ImGui::End();

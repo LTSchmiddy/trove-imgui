@@ -9,8 +9,9 @@ void construct_menu_bar() {
 
         if (ImGui::BeginMenu("File")) {
             
-            ImGui::Checkbox("Show Demo Window", &APP_GLOBAL.show_demo_window);
-            ImGui::Checkbox("Show Style Window", &APP_GLOBAL.show_style_window);
+            ImGui::Checkbox("Show Demo Window", &g_AppGlobal.show_demo_window);
+            ImGui::Checkbox("Show Style Window", &g_AppGlobal.style_window->open);
+            ImGui::Checkbox("Show Python Console Window", &g_AppGlobal.py_console_window->open);
             ImGui::EndMenu();
         }
 
